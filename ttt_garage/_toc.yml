@@ -1,0 +1,12 @@
+# Table of contents
+# Learn more at https://jupyterbook.org/customize/toc.html
+
+format: jb-book
+root: intro
+chapters:
+- file: aero/aero_example
+- file: aerostructural/aerostructural_example
+- file: battery/battery_example
+- file: rotor_aero/rotor_aero_example
+- file: trajectory/trajectory_example
+
