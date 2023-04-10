@@ -1,0 +1,105 @@
+Traceback (most recent call last):
+  File "/home/john/anaconda3/envs/dev/lib/python3.8/site-packages/jupyter_cache/executors/utils.py", line 51, in single_nb_execution
+    executenb(
+  File "/home/john/anaconda3/envs/dev/lib/python3.8/site-packages/nbclient/client.py", line 1204, in execute
+    return NotebookClient(nb=nb, resources=resources, km=km, **kwargs).execute()
+  File "/home/john/anaconda3/envs/dev/lib/python3.8/site-packages/nbclient/util.py", line 84, in wrapped
+    return just_run(coro(*args, **kwargs))
+  File "/home/john/anaconda3/envs/dev/lib/python3.8/site-packages/nbclient/util.py", line 62, in just_run
+    return loop.run_until_complete(coro)
+  File "/home/john/anaconda3/envs/dev/lib/python3.8/asyncio/base_events.py", line 616, in run_until_complete
+    return future.result()
+  File "/home/john/anaconda3/envs/dev/lib/python3.8/site-packages/nbclient/client.py", line 663, in async_execute
+    await self.async_execute_cell(
+  File "/home/john/anaconda3/envs/dev/lib/python3.8/site-packages/nbclient/client.py", line 965, in async_execute_cell
+    await self._check_raise_for_error(cell, cell_index, exec_reply)
+  File "/home/john/anaconda3/envs/dev/lib/python3.8/site-packages/nbclient/client.py", line 862, in _check_raise_for_error
+    raise CellExecutionError.from_cell_and_msg(cell, exec_reply_content)
+nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
+------------------
+import os
+import openmdao.api as om
+from pygeo.mphys import OM_DVGEOCOMP
+import openvsp
+
+from vspaero.pyvspaero import pyVSPAero
+from vspaero import functions
+
+# Setup VLM assembler
+vsp_file = os.path.join(os.path.dirname(__file__), "./rect_wing.vsp3")
+
+class FlightCase(om.ExplicitComponent):
+    def initialize(self):
+        self.options.declare("vsp_file", recordable=False)
+
+    def setup(self):
+        # VSP model
+        vsp_file = self.options["vsp_file"]
+
+        VLMAssembler = pyVSPAero(vsp_file)
+        # Add output functions
+        VLMAssembler.add_function("CL", functions.CLi)
+        VLMAssembler.add_function("CD", functions.CDi)
+        self.assembler = VLMAssembler
+
+        # Create a steady problem instance
+        self.problem = VLMAssembler.create_steady_problem(self.name, options={"symmetry": "Y"})
+
+        mesh_xyz = self.problem.get_geometry()
+
+        self.add_input("aoa", val=5.0)
+        self.add_input("S_ref", val=10.0)
+        self.add_input("x_aero", val=mesh_xyz, shape=mesh_xyz.shape)
+        for out_name in self.problem.func_list:
+            self.add_output(out_name, val=1.0)
+
+        self.declare_partials("*", "*")
+
+    def get_mesh(self):
+        return self.problem.get_geometry()
+
+    def compute(self, inputs, outputs):
+        self.problem.set_flight_vars(**inputs)
+        self.problem.set_geometry(inputs["x_aero"])
+
+        self.problem.solve()
+
+        funcs = {}
+        self.problem.eval_functions(funcs)
+
+        for out_name in outputs:
+            output_key = f"{self.name}_{out_name}"
+            outputs[out_name] = funcs[output_key]
+
+        self.problem.write_solution(output_dir="./output")
+
+    def compute_partials(self, inputs, J):
+        """ Jacobian of partial derivatives."""
+
+        self.problem.set_flight_vars(**inputs)
+        self.problem.set_geometry(inputs["x_aero"])
+
+        funcs_sens = {}
+        self.problem.eval_functions_sens(funcs_sens)
+
+        for out_name in self.problem.func_list:
+            for in_name in inputs:
+                output_key = f"{self.name}_{out_name}"
+                if in_name == "x_aero":
+                    J[out_name, in_name] = funcs_sens[output_key]["xyz"]
+                else:
+                    J[out_name, in_name] = funcs_sens[output_key][in_name]
+------------------
+
+[0;31m---------------------------------------------------------------------------[0m
+[0;31mNameError[0m                                 Traceback (most recent call last)
+Cell [0;32mIn[1], line 10[0m
+[1;32m      7[0m [38;5;28;01mfrom[39;00m [38;5;21;01mvspaero[39;00m [38;5;28;01mimport[39;00m functions
+[1;32m      9[0m [38;5;66;03m# Setup VLM assembler[39;00m
+[0;32m---> 10[0m vsp_file [38;5;241m=[39m os[38;5;241m.[39mpath[38;5;241m.[39mjoin(os[38;5;241m.[39mpath[38;5;241m.[39mdirname([38;5;18;43m__file__[39;49m), [38;5;124m"[39m[38;5;124m./rect_wing.vsp3[39m[38;5;124m"[39m)
+[1;32m     12[0m [38;5;28;01mclass[39;00m [38;5;21;01mFlightCase[39;00m(om[38;5;241m.[39mExplicitComponent):
+[1;32m     13[0m     [38;5;28;01mdef[39;00m [38;5;21minitialize[39m([38;5;28mself[39m):
+
+[0;31mNameError[0m: name '__file__' is not defined
+NameError: name '__file__' is not defined
+
