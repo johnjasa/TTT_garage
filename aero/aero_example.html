@@ -619,9 +619,9 @@ The initial_mesh and geometry subsystems set up the geometry of the problem usin
 </div>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Initializing DVGeometryVSP
-Loading the vsp model took: 0.026409626007080078
+Loading the vsp model took: 0.0248568058013916
 Building a quad mesh for fast projections.
-Initialized DVGeometry VSP in 0.030861854553222656 seconds.
+Initialized DVGeometry VSP in 0.02985835075378418 seconds.
 </pre></div>
 </div>
 <div class="output text_html">
@@ -634,7 +634,7 @@ Initialized DVGeometry VSP in 0.030861854553222656 seconds.
 
 ></iframe>
 </div><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>DVGeometryVSP note:
-Adding pointset x_aero0 took 0.0039005279541015625 seconds.
+Adding pointset x_aero0 took 0.0037925243377685547 seconds.
 Maximum distance between the added points and the VSP geometry is 3.731756137924373e-12
 </pre></div>
 </div>
@@ -658,10 +658,10 @@ Objectives
 {&#39;cruise.CD&#39;: array([0.00599209])}
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>FD jacobian calcs with dvgeovsp took 0.15753722190856934 seconds in total
-updating the vsp model took 0.11321234703063965 seconds
-evaluating the new points took 0.0029735565185546875 seconds
-communication took 0.00024127960205078125 seconds
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>FD jacobian calcs with dvgeovsp took 0.15299153327941895 seconds in total
+updating the vsp model took 0.10991072654724121 seconds
+evaluating the new points took 0.002866506576538086 seconds
+communication took 0.0002627372741699219 seconds
 Driver debug print for iter coord: rank0:pyOptSparse_SNOPT|1
 ------------------------------------------------------------
 Design Vars
@@ -698,19 +698,19 @@ Objectives
 {&#39;cruise.CD&#39;: array([0.00755966])}
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>FD jacobian calcs with dvgeovsp took 0.26655101776123047 seconds in total
-updating the vsp model took 0.21904277801513672 seconds
-evaluating the new points took 0.0028450489044189453 seconds
-communication took 0.000194549560546875 seconds
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>FD jacobian calcs with dvgeovsp took 0.25097227096557617 seconds in total
+updating the vsp model took 0.20206332206726074 seconds
+evaluating the new points took 0.002980470657348633 seconds
+communication took 0.0002014636993408203 seconds
 Driver debug print for iter coord: rank0:pyOptSparse_SNOPT|3
 ------------------------------------------------------------
 Design Vars
 {&#39;WingGeom:XSec_1:Root_Chord&#39;: array([0.89473097]),
- &#39;WingGeom:XSec_2:Root_Chord&#39;: array([0.76437143]),
- &#39;WingGeom:XSec_3:Root_Chord&#39;: array([1.25764842]),
- &#39;WingGeom:XSec_4:Root_Chord&#39;: array([1.21193097]),
- &#39;WingGeom:XSec_4:Tip_Chord&#39;: array([0.63736738]),
- &#39;cruise.aoa&#39;: array([5.49025157])}
+ &#39;WingGeom:XSec_2:Root_Chord&#39;: array([0.76437144]),
+ &#39;WingGeom:XSec_3:Root_Chord&#39;: array([1.25764843]),
+ &#39;WingGeom:XSec_4:Root_Chord&#39;: array([1.21193095]),
+ &#39;WingGeom:XSec_4:Tip_Chord&#39;: array([0.6373674]),
+ &#39;cruise.aoa&#39;: array([5.49025158])}
 </pre></div>
 </div>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Nonlinear constraints
@@ -725,9 +725,9 @@ Objectives
 Design Vars
 {&#39;WingGeom:XSec_1:Root_Chord&#39;: array([1.08683471]),
  &#39;WingGeom:XSec_2:Root_Chord&#39;: array([1.133254]),
- &#39;WingGeom:XSec_3:Root_Chord&#39;: array([1.12970597]),
- &#39;WingGeom:XSec_4:Root_Chord&#39;: array([0.8362556]),
- &#39;WingGeom:XSec_4:Tip_Chord&#39;: array([0.71473414]),
+ &#39;WingGeom:XSec_3:Root_Chord&#39;: array([1.12970598]),
+ &#39;WingGeom:XSec_4:Root_Chord&#39;: array([0.83625559]),
+ &#39;WingGeom:XSec_4:Tip_Chord&#39;: array([0.71473415]),
  &#39;cruise.aoa&#39;: array([5.55148101])}
 </pre></div>
 </div>
@@ -738,154 +738,26 @@ Objectives
 {&#39;cruise.CD&#39;: array([0.00750284])}
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>capi_return is NULL
-Call-back cb_userfg_in_snoptc__user__routines failed.
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>FD jacobian calcs with dvgeovsp took 0.27674412727355957 seconds in total
+updating the vsp model took 0.2261066436767578 seconds
+evaluating the new points took 0.0029745101928710938 seconds
+communication took 0.0002238750457763672 seconds
+Driver debug print for iter coord: rank0:pyOptSparse_SNOPT|5
+------------------------------------------------------------
+Design Vars
+{&#39;WingGeom:XSec_1:Root_Chord&#39;: array([1.14009194]),
+ &#39;WingGeom:XSec_2:Root_Chord&#39;: array([1.1842854]),
+ &#39;WingGeom:XSec_3:Root_Chord&#39;: array([1.13326328]),
+ &#39;WingGeom:XSec_4:Root_Chord&#39;: array([0.78303945]),
+ &#39;WingGeom:XSec_4:Tip_Chord&#39;: array([0.6587318]),
+ &#39;cruise.aoa&#39;: array([5.66413494])}
 </pre></div>
 </div>
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">KeyboardInterrupt</span><span class="g g-Whitespace">                         </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">line</span> <span class="mi">64</span>
-<span class="g g-Whitespace">     </span><span class="mi">61</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="n">prob</span><span class="p">[</span><span class="s2">&quot;cruise.CL&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-<span class="g g-Whitespace">     </span><span class="mi">62</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;CD&quot;</span><span class="p">,</span> <span class="n">prob</span><span class="p">[</span><span class="s2">&quot;cruise.CD&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-<span class="ne">---&gt; </span><span class="mi">64</span> <span class="n">prob</span><span class="o">.</span><span class="n">run_driver</span><span class="p">()</span>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Nonlinear constraints
+{&#39;cruise.CL&#39;: array([0.49961075]), &#39;planform.S_ref&#39;: array([10.])}
 
-<span class="nn">File /mnt/c/Users/John/Dropbox/git/openmdao/openmdao/utils/hooks.py:131,</span> in <span class="ni">_hook_decorator.&lt;locals&gt;.execute_hooks</span><span class="nt">(*args, **kwargs)</span>
-<span class="g g-Whitespace">    </span><span class="mi">129</span> <span class="k">def</span> <span class="nf">execute_hooks</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">130</span>     <span class="n">_run_hooks</span><span class="p">(</span><span class="n">pre_hooks</span><span class="p">,</span> <span class="n">inst</span><span class="p">)</span>
-<span class="ne">--&gt; </span><span class="mi">131</span>     <span class="n">ret</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">132</span>     <span class="n">_run_hooks</span><span class="p">(</span><span class="n">post_hooks</span><span class="p">,</span> <span class="n">inst</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">133</span>     <span class="k">return</span> <span class="n">ret</span>
-
-<span class="nn">File /mnt/c/Users/John/Dropbox/git/openmdao/openmdao/core/problem.py:680,</span> in <span class="ni">Problem.run_driver</span><span class="nt">(self, case_prefix, reset_iter_counts)</span>
-<span class="g g-Whitespace">    </span><span class="mi">677</span>     <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_clear_iprint</span><span class="p">()</span>
-<span class="g g-Whitespace">    </span><span class="mi">679</span>     <span class="k">with</span> <span class="n">SaveOptResult</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="p">):</span>
-<span class="ne">--&gt; </span><span class="mi">680</span>         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-<span class="g g-Whitespace">    </span><span class="mi">681</span> <span class="k">finally</span><span class="p">:</span>
-<span class="g g-Whitespace">    </span><span class="mi">682</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_recording_iter</span><span class="o">.</span><span class="n">prefix</span> <span class="o">=</span> <span class="n">old_prefix</span>
-
-<span class="nn">File /mnt/c/Users/John/Dropbox/git/openmdao/openmdao/drivers/pyoptsparse_driver.py:551,</span> in <span class="ni">pyOptSparseDriver.run</span><span class="nt">(self)</span>
-<span class="g g-Whitespace">    </span><span class="mi">547</span>             <span class="bp">self</span><span class="o">.</span><span class="n">_exc_info</span> <span class="o">=</span> <span class="p">(</span><span class="ne">Exception</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">548</span>     <span class="k">else</span><span class="p">:</span>
-<span class="g g-Whitespace">    </span><span class="mi">549</span> 
-<span class="g g-Whitespace">    </span><span class="mi">550</span>         <span class="c1"># Use OpenMDAO&#39;s differentiator for the gradient</span>
-<span class="ne">--&gt; </span><span class="mi">551</span>         <span class="n">sol</span> <span class="o">=</span> <span class="n">opt</span><span class="p">(</span><span class="n">opt_prob</span><span class="p">,</span> <span class="n">sens</span><span class="o">=</span><span class="n">WeakMethodWrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_gradfunc&#39;</span><span class="p">),</span>
-<span class="g g-Whitespace">    </span><span class="mi">552</span>                   <span class="n">storeHistory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hist_file</span><span class="p">,</span> <span class="n">hotStart</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hotstart_file</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">554</span> <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">c</span><span class="p">:</span>
-<span class="g g-Whitespace">    </span><span class="mi">555</span>     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exc_info</span><span class="p">:</span>
-
-<span class="nn">File ~/anaconda3/envs/dev/lib/python3.8/site-packages/pyoptsparse/pySNOPT/pySNOPT.py:486,</span> in <span class="ni">SNOPT.__call__</span><span class="nt">(self, optProb, sens, sensStep, sensMode, storeHistory, hotStart, storeSens, timeLimit, restartDict)</span>
-<span class="g g-Whitespace">    </span><span class="mi">484</span> <span class="n">timeA</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-<span class="g g-Whitespace">    </span><span class="mi">485</span> <span class="c1"># fmt: off</span>
-<span class="ne">--&gt; </span><span class="mi">486</span> <span class="n">hs</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="n">rc</span><span class="p">,</span> <span class="n">inform</span><span class="p">,</span> <span class="n">mincw</span><span class="p">,</span> <span class="n">miniw</span><span class="p">,</span> <span class="n">minrw</span><span class="p">,</span> <span class="n">nS</span><span class="p">,</span> <span class="n">ninf</span><span class="p">,</span> <span class="n">sinf</span><span class="p">,</span> <span class="n">obj</span> <span class="o">=</span> <span class="n">snopt</span><span class="o">.</span><span class="n">snkerc</span><span class="p">(</span>
-<span class="g g-Whitespace">    </span><span class="mi">487</span>     <span class="n">start</span><span class="p">,</span> <span class="n">nnCon</span><span class="p">,</span> <span class="n">nnObj</span><span class="p">,</span> <span class="n">nnJac</span><span class="p">,</span> <span class="n">iObj</span><span class="p">,</span> <span class="n">ObjAdd</span><span class="p">,</span> <span class="n">ProbNm</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">488</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_userfg_wrap</span><span class="p">,</span> <span class="n">snopt</span><span class="o">.</span><span class="n">snlog</span><span class="p">,</span> <span class="n">snopt</span><span class="o">.</span><span class="n">snlog2</span><span class="p">,</span> <span class="n">snopt</span><span class="o">.</span><span class="n">sqlog</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_snstop</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">489</span>     <span class="n">Acol</span><span class="p">,</span> <span class="n">indA</span><span class="p">,</span> <span class="n">locA</span><span class="p">,</span> <span class="n">bl</span><span class="p">,</span> <span class="n">bu</span><span class="p">,</span> <span class="n">Names</span><span class="p">,</span> <span class="n">hs</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="n">cu</span><span class="p">,</span> <span class="n">iu</span><span class="p">,</span> <span class="n">ru</span><span class="p">,</span> <span class="n">cw</span><span class="p">,</span> <span class="n">iw</span><span class="p">,</span> <span class="n">rw</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">490</span> <span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">491</span> <span class="c1"># fmt: on</span>
-<span class="g g-Whitespace">    </span><span class="mi">492</span> <span class="n">optTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">timeA</span>
-
-<span class="nn">File ~/anaconda3/envs/dev/lib/python3.8/site-packages/pyoptsparse/pySNOPT/pySNOPT.py:563,</span> in <span class="ni">SNOPT._userfg_wrap</span><span class="nt">(self, mode, nnJac, x, fobj, gobj, fcon, gcon, nState, cu, iu, ru)</span>
-<span class="g g-Whitespace">    </span><span class="mi">561</span> <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-<span class="g g-Whitespace">    </span><span class="mi">562</span>     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">getOption</span><span class="p">(</span><span class="s2">&quot;Derivative level&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-<span class="ne">--&gt; </span><span class="mi">563</span>         <span class="n">gobj</span><span class="p">,</span> <span class="n">gcon</span><span class="p">,</span> <span class="n">fail</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_masterFunc</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;gobj&quot;</span><span class="p">,</span> <span class="s2">&quot;gcon&quot;</span><span class="p">])</span>
-<span class="g g-Whitespace">    </span><span class="mi">564</span> <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-<span class="g g-Whitespace">    </span><span class="mi">565</span>     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">getOption</span><span class="p">(</span><span class="s2">&quot;Derivative level&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-
-<span class="nn">File ~/anaconda3/envs/dev/lib/python3.8/site-packages/pyoptsparse/pyOpt_optimizer.py:321,</span> in <span class="ni">Optimizer._masterFunc</span><span class="nt">(self, x, evaluate)</span>
-<span class="g g-Whitespace">    </span><span class="mi">318</span> <span class="c1"># Now broadcast out the required arguments:</span>
-<span class="g g-Whitespace">    </span><span class="mi">319</span> <span class="bp">self</span><span class="o">.</span><span class="n">optProb</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
-<span class="ne">--&gt; </span><span class="mi">321</span> <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_masterFunc2</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">322</span> <span class="bp">self</span><span class="o">.</span><span class="n">interfaceTime</span> <span class="o">+=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">timeA</span>
-<span class="g g-Whitespace">    </span><span class="mi">323</span> <span class="k">return</span> <span class="n">result</span>
-
-<span class="nn">File ~/anaconda3/envs/dev/lib/python3.8/site-packages/pyoptsparse/pyOpt_optimizer.py:460,</span> in <span class="ni">Optimizer._masterFunc2</span><span class="nt">(self, x, evaluate, writeHist)</span>
-<span class="g g-Whitespace">    </span><span class="mi">458</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="s2">&quot;gobj&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<span class="g g-Whitespace">    </span><span class="mi">459</span>     <span class="n">timeA</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-<span class="ne">--&gt; </span><span class="mi">460</span>     <span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sens</span><span class="p">(</span><span class="n">xuser</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="s2">&quot;funcs&quot;</span><span class="p">])</span>
-<span class="g g-Whitespace">    </span><span class="mi">462</span>     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">463</span>         <span class="n">funcsSens</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-<span class="nn">File /mnt/c/Users/John/Dropbox/git/openmdao/openmdao/utils/class_util.py:82,</span> in <span class="ni">WeakMethodWrapper.__call__</span><span class="nt">(self, *args, **kwargs)</span>
-<span class="g g-Whitespace">     </span><span class="mi">66</span> <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="g g-Whitespace">     </span><span class="mi">67</span><span class="w">     </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="g g-Whitespace">     </span><span class="mi">68</span><span class="sd">     Call the named method on the object.</span>
-<span class="g g-Whitespace">     </span><span class="mi">69</span><span class="sd"> </span>
-<span class="sd">   (...)</span>
-<span class="g g-Whitespace">     </span><span class="mi">80</span><span class="sd">         The return value of the wrapped method called with the given args.</span>
-<span class="g g-Whitespace">     </span><span class="mi">81</span><span class="sd">     &quot;&quot;&quot;</span>
-<span class="ne">---&gt; </span><span class="mi">82</span>     <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ref</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-<span class="nn">File /mnt/c/Users/John/Dropbox/git/openmdao/openmdao/drivers/pyoptsparse_driver.py:730,</span> in <span class="ni">pyOptSparseDriver._gradfunc</span><span class="nt">(self, dv_dict, func_dict)</span>
-<span class="g g-Whitespace">    </span><span class="mi">728</span> <span class="k">try</span><span class="p">:</span>
-<span class="g g-Whitespace">    </span><span class="mi">729</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_in_user_function</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="ne">--&gt; </span><span class="mi">730</span>     <span class="n">sens_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_totals</span><span class="p">(</span><span class="n">of</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_quantities</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">731</span>                                      <span class="n">wrt</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_indep_list</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">732</span>                                      <span class="n">return_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_total_jac_format</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">734</span>     <span class="c1"># First time through, check for zero row/col.</span>
-<span class="g g-Whitespace">    </span><span class="mi">735</span>     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_jac</span><span class="p">:</span>
-
-<span class="nn">File /mnt/c/Users/John/Dropbox/git/openmdao/openmdao/utils/hooks.py:131,</span> in <span class="ni">_hook_decorator.&lt;locals&gt;.execute_hooks</span><span class="nt">(*args, **kwargs)</span>
-<span class="g g-Whitespace">    </span><span class="mi">129</span> <span class="k">def</span> <span class="nf">execute_hooks</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">130</span>     <span class="n">_run_hooks</span><span class="p">(</span><span class="n">pre_hooks</span><span class="p">,</span> <span class="n">inst</span><span class="p">)</span>
-<span class="ne">--&gt; </span><span class="mi">131</span>     <span class="n">ret</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">132</span>     <span class="n">_run_hooks</span><span class="p">(</span><span class="n">post_hooks</span><span class="p">,</span> <span class="n">inst</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">133</span>     <span class="k">return</span> <span class="n">ret</span>
-
-<span class="nn">File /mnt/c/Users/John/Dropbox/git/openmdao/openmdao/core/driver.py:1018,</span> in <span class="ni">Driver._compute_totals</span><span class="nt">(self, of, wrt, return_format, use_abs_names, driver_scaling)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1015</span> <span class="bp">self</span><span class="o">.</span><span class="n">_recording_iter</span><span class="o">.</span><span class="n">push</span><span class="p">((</span><span class="s1">&#39;_compute_totals&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-<span class="g g-Whitespace">   </span><span class="mi">1017</span> <span class="k">try</span><span class="p">:</span>
-<span class="ne">-&gt; </span><span class="mi">1018</span>     <span class="n">totals</span> <span class="o">=</span> <span class="n">total_jac</span><span class="o">.</span><span class="n">compute_totals</span><span class="p">()</span>
-<span class="g g-Whitespace">   </span><span class="mi">1019</span> <span class="k">finally</span><span class="p">:</span>
-<span class="g g-Whitespace">   </span><span class="mi">1020</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_recording_iter</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-
-<span class="nn">File /mnt/c/Users/John/Dropbox/git/openmdao/openmdao/core/total_jac.py:1397,</span> in <span class="ni">_TotalJacInfo.compute_totals</span><span class="nt">(self)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1395</span> <span class="k">with</span> <span class="n">model</span><span class="o">.</span><span class="n">_scaled_context_all</span><span class="p">():</span>
-<span class="g g-Whitespace">   </span><span class="mi">1396</span>     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">_subsystems_allprocs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-<span class="ne">-&gt; </span><span class="mi">1397</span>         <span class="n">model</span><span class="o">.</span><span class="n">_linearize</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">_assembled_jac</span><span class="p">,</span>
-<span class="g g-Whitespace">   </span><span class="mi">1398</span>                          <span class="n">sub_do_ln</span><span class="o">=</span><span class="n">ln_solver</span><span class="o">.</span><span class="n">_linearize_children</span><span class="p">(),</span>
-<span class="g g-Whitespace">   </span><span class="mi">1399</span>                          <span class="n">rel_systems</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">total_relevant_systems</span><span class="p">)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1400</span>     <span class="k">else</span><span class="p">:</span>
-<span class="g g-Whitespace">   </span><span class="mi">1401</span>         <span class="n">model</span><span class="o">.</span><span class="n">_linearize</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">_assembled_jac</span><span class="p">,</span>
-<span class="g g-Whitespace">   </span><span class="mi">1402</span>                          <span class="n">sub_do_ln</span><span class="o">=</span><span class="n">ln_solver</span><span class="o">.</span><span class="n">_linearize_children</span><span class="p">())</span>
-
-<span class="nn">File /mnt/c/Users/John/Dropbox/git/openmdao/openmdao/core/group.py:2752,</span> in <span class="ni">Group._linearize</span><span class="nt">(self, jac, sub_do_ln, rel_systems)</span>
-<span class="g g-Whitespace">   </span><span class="mi">2750</span>             <span class="n">subsys</span><span class="o">.</span><span class="n">_linearize</span><span class="p">(</span><span class="n">jac</span><span class="p">,</span> <span class="n">sub_do_ln</span><span class="o">=</span><span class="n">do_ln</span><span class="p">,</span> <span class="n">rel_systems</span><span class="o">=</span><span class="n">rel_systems</span><span class="p">)</span>
-<span class="g g-Whitespace">   </span><span class="mi">2751</span>         <span class="k">else</span><span class="p">:</span>
-<span class="ne">-&gt; </span><span class="mi">2752</span>             <span class="n">subsys</span><span class="o">.</span><span class="n">_linearize</span><span class="p">(</span><span class="n">jac</span><span class="p">,</span> <span class="n">sub_do_ln</span><span class="o">=</span><span class="n">do_ln</span><span class="p">)</span>
-<span class="g g-Whitespace">   </span><span class="mi">2754</span> <span class="c1"># Update jacobian</span>
-<span class="g g-Whitespace">   </span><span class="mi">2755</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assembled_jac</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-
-<span class="nn">File /mnt/c/Users/John/Dropbox/git/openmdao/openmdao/core/explicitcomponent.py:520,</span> in <span class="ni">ExplicitComponent._linearize</span><span class="nt">(self, jac, sub_do_ln)</span>
-<span class="g g-Whitespace">    </span><span class="mi">516</span>     <span class="n">approximation</span><span class="o">.</span><span class="n">compute_approximations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jac</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_jacobian</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">518</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_compute_partials</span><span class="p">:</span>
-<span class="g g-Whitespace">    </span><span class="mi">519</span>     <span class="c1"># We used to negate the jacobian here, and then re-negate after the hook.</span>
-<span class="ne">--&gt; </span><span class="mi">520</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_compute_partials_wrapper</span><span class="p">()</span>
-
-<span class="nn">File /mnt/c/Users/John/Dropbox/git/openmdao/openmdao/core/explicitcomponent.py:494,</span> in <span class="ni">ExplicitComponent._compute_partials_wrapper</span><span class="nt">(self)</span>
-<span class="g g-Whitespace">    </span><span class="mi">492</span>     <span class="bp">self</span><span class="o">.</span><span class="n">compute_partials</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jacobian</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_discrete_inputs</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">493</span> <span class="k">else</span><span class="p">:</span>
-<span class="ne">--&gt; </span><span class="mi">494</span>     <span class="bp">self</span><span class="o">.</span><span class="n">compute_partials</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jacobian</span><span class="p">)</span>
-
-<span class="nn">Cell In[1], line 62,</span> in <span class="ni">FlightCase.compute_partials</span><span class="nt">(self, inputs, J)</span>
-<span class="g g-Whitespace">     </span><span class="mi">59</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;x_aero&quot;</span><span class="p">])</span>
-<span class="g g-Whitespace">     </span><span class="mi">61</span> <span class="n">funcs_sens</span> <span class="o">=</span> <span class="p">{}</span>
-<span class="ne">---&gt; </span><span class="mi">62</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">eval_functions_sens</span><span class="p">(</span><span class="n">funcs_sens</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">64</span> <span class="k">for</span> <span class="n">out_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">func_list</span><span class="p">:</span>
-<span class="g g-Whitespace">     </span><span class="mi">65</span>     <span class="k">for</span> <span class="n">in_name</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">:</span>
-
-<span class="nn">File /mnt/c/Users/John/Dropbox/git/VSPAERO/vspaero/problems/steady.py:140,</span> in <span class="ni">SteadyProblem.eval_functions_sens</span><span class="nt">(self, funcs_sens, eval_funcs)</span>
-<span class="g g-Whitespace">    </span><span class="mi">136</span>     <span class="k">if</span> <span class="n">f</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">func_list</span><span class="p">:</span>
-<span class="g g-Whitespace">    </span><span class="mi">137</span>         <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vspaero_error</span><span class="p">(</span><span class="s2">&quot;Supplied function has not been added &quot;</span>
-<span class="g g-Whitespace">    </span><span class="mi">138</span>                                   <span class="s2">&quot;using add_function()&quot;</span><span class="p">)</span>
-<span class="ne">--&gt; </span><span class="mi">140</span> <span class="bp">self</span><span class="o">.</span><span class="n">solve_adjoint</span><span class="p">()</span>
-<span class="g g-Whitespace">    </span><span class="mi">142</span> <span class="k">for</span> <span class="n">fidx</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">func_list</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">143</span>     <span class="k">if</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">eval_funcs</span><span class="p">:</span>
-
-<span class="nn">File /mnt/c/Users/John/Dropbox/git/VSPAERO/vspaero/problems/base.py:287,</span> in <span class="ni">BaseProblem.solve_adjoint</span><span class="nt">(self)</span>
-<span class="g g-Whitespace">    </span><span class="mi">286</span> <span class="k">def</span> <span class="nf">solve_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="ne">--&gt; </span><span class="mi">287</span>     <span class="bp">self</span><span class="o">.</span><span class="n">assembler</span><span class="o">.</span><span class="n">solve_adjoint</span><span class="p">()</span>
-
-<span class="ne">KeyboardInterrupt</span>: 
+Objectives
+{&#39;cruise.CD&#39;: array([0.00783321])}
 </pre></div>
 </div>
 </div>
