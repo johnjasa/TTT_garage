@@ -50,6 +50,8 @@ const thebe_selector_input = "pre"
 const thebe_selector_output = ".output, .cell_output"
 </script>
     <script async="async" src="../_static/sphinx-thebe.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Battery pack thermal modeling" href="../battery/battery_example.html" />
@@ -294,12 +296,46 @@ title="Print to PDF"
     </ul>
   </div>
 </div>
+<label for="__page-toc"
+  class="headerbtn headerbtn-page-toc"
+  
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-list"></i>
+  </span>
+
+</label>
 
     </div>
 </div>
 
 <!-- Table of contents -->
 <div class="col-md-3 bd-toc show noprint">
+    <div class="tocsection onthispage pt-5 pb-3">
+        <i class="fas fa-list"></i> Contents
+    </div>
+    <nav id="bd-toc-nav" aria-label="Page">
+        <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#introduction">
+   Introduction
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#tools-used-and-installation-procedure">
+   Tools used and installation procedure
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#optimization-problem-formulation">
+   Optimization problem formulation
+  </a>
+ </li>
+</ul>
+
+    </nav>
 </div>
     </div>
     <div class="article row">
@@ -311,6 +347,29 @@ title="Print to PDF"
                 <div id="print-main-content">
                     <div id="jb-print-toc">
                         
+                        <div>
+                            <h2> Contents </h2>
+                        </div>
+                        <nav aria-label="Page">
+                            <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#introduction">
+   Introduction
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#tools-used-and-installation-procedure">
+   Tools used and installation procedure
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#optimization-problem-formulation">
+   Optimization problem formulation
+  </a>
+ </li>
+</ul>
+
+                        </nav>
                     </div>
                 </div>
             </div>
@@ -320,11 +379,47 @@ title="Print to PDF"
                 
   <section class="tex2jax_ignore mathjax_ignore" id="aerostructural-wing-optimization-using-openaerostruct">
 <h1>Aerostructural wing optimization using OpenAeroStruct<a class="headerlink" href="#aerostructural-wing-optimization-using-openaerostruct" title="Permalink to this headline">#</a></h1>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">#</a></h2>
 <p>This example demonstrates the aerostructural optimization of the Common Research Model (CRM) wing using OpenAeroStruct. The aerostructural design problem is formulated as an optimization problem, with the goal of minimizing fuel burn while satisfying structural and aerodynamic performance constraints.</p>
 <p>The problem involves coupling of two disciplines: aerodynamics and structures. The aerostructural optimization is performed using an AerostructPoint group, which contains the additional components needed for aerostructural optimization.</p>
-<p>The CRM wing is modeled as a thin-walled tube with aluminum 7075 spar material. The wing surface is divided into a mesh using generate_mesh, with the mesh_dict dictionary defining the wing geometry. The aerostructural problem formulation is based on the FEM model type of “tube”.</p>
+<p>The structural part of the CRM wing is modeled as a wingbox made of aluminum. The aerodynamic wing surface is represented using a vortex lattice method (VLM).</p>
 <p>The optimization problem formulation is set up using the OpenMDAO framework, with the ScipyOptimizeDriver as the optimizer. The design variables, constraints, and objective function are added to the problem, and the problem is set up and solved using the prob.setup() and prob.run_driver() methods, respectively.</p>
 <p>Overall, this example highlights the capabilities of OpenAeroStruct for aerostructural optimization, and demonstrates the use of aerostructural optimization in designing aircraft wings for improved fuel efficiency and performance.</p>
+<p>This example heavily draws from <a class="reference external" href="https://mdolab-openaerostruct.readthedocs-hosted.com/en/latest/aerostructural_wingbox_walkthrough.html">this page in the OpenAeroStruct docs</a>; the figure below shows a visualization of the optimized aerostructural wing.</p>
+<p><img alt="OpenAeroStruct wing" src="../_images/wingbox_fine.png" /></p>
+</section>
+<section id="tools-used-and-installation-procedure">
+<h2>Tools used and installation procedure<a class="headerlink" href="#tools-used-and-installation-procedure" title="Permalink to this headline">#</a></h2>
+<p><a class="reference external" href="https://github.com/mdolab/OpenAeroStruct/">OpenAeroStruct</a> is a lightweight tool that performs aerostructural optimization using OpenMDAO. It couples a vortex-lattice method (VLM) and a 6 degrees of freedom 3-dimensional spatial beam model to simulate aerodynamic and structural analyses using lifting surfaces. These simulations are wrapped with an optimizer using NASA’s OpenMDAO framework. <a class="reference external" href="https://mdolab.engin.umich.edu/bibliography/Jasa2018a.html">This journal paper</a> goes into much more detail about the theory behind OpenAerostruct, and <a class="reference external" href="https://mdolab-openaerostruct.readthedocs-hosted.com/en/latest/">its accompanying documentation</a> is also helpful.</p>
+<p>OpenAerostruct is pip installable via <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">openaerostruct</span></code> and all the pre-requisites for OAS will be installed along with that command.</p>
+</section>
+<section id="optimization-problem-formulation">
+<h2>Optimization problem formulation<a class="headerlink" href="#optimization-problem-formulation" title="Permalink to this headline">#</a></h2>
+<p>18 design variables and 5 constraints</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align*}
+\text{Minimize} &amp; \quad \text{fuel burn} \\
+\text{With respect to design variables} &amp; \quad \text{wing twist} \\
+                                        &amp; \quad \text{wingbox spar thickness} \\
+                                        &amp; \quad \text{wingbox skin thickness} \\
+                                        &amp; \quad \text{thickness-to-chord ratio} \\
+                                        &amp; \quad \alpha_{\text{maneuver}} \\
+                                        &amp; \quad \text{fuel mass} \\
+\text{Subject to constraints} &amp; \quad C_L = 0.5 \\
+                              &amp; \quad L = W \\
+                              &amp; \quad f_{\text{structural failure}} &lt;= 1 \\
+\end{align*}
+\end{split}\]</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load</span> -r 1-20 oas_example.py
+</pre></div>
+</div>
+</div>
+</div>
+</section>
 </section>
 
     <script type="text/x-thebe-config">
