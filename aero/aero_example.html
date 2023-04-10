@@ -607,8 +607,6 @@ The initial_mesh and geometry subsystems set up the geometry of the problem usin
 
 <span class="n">prob</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
 
-<span class="c1"># Create a n^2 diagram for user to view model connections</span>
-<span class="n">om</span><span class="o">.</span><span class="n">n2</span><span class="p">(</span><span class="n">prob</span><span class="p">,</span> <span class="n">show_browser</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">prob</span><span class="o">.</span><span class="n">run_model</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="n">prob</span><span class="p">[</span><span class="s2">&quot;cruise.CL&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;CD&quot;</span><span class="p">,</span> <span class="n">prob</span><span class="p">[</span><span class="s2">&quot;cruise.CD&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
@@ -619,27 +617,18 @@ The initial_mesh and geometry subsystems set up the geometry of the problem usin
 </div>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Initializing DVGeometryVSP
-Loading the vsp model took: 0.0248568058013916
+Loading the vsp model took: 0.031792402267456055
 Building a quad mesh for fast projections.
-Initialized DVGeometry VSP in 0.02985835075378418 seconds.
+Initialized DVGeometry VSP in 0.03760719299316406 seconds.
 </pre></div>
 </div>
-<div class="output text_html">
-<iframe
-    width="100%"
-    height="700"
-    src="n2.html"
-    frameborder="0"
-    allowfullscreen
-
-></iframe>
-</div><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>DVGeometryVSP note:
-Adding pointset x_aero0 took 0.0037925243377685547 seconds.
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>DVGeometryVSP note:
+Adding pointset x_aero0 took 0.004343986511230469 seconds.
 Maximum distance between the added points and the VSP geometry is 3.731756137924373e-12
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CL 0.429910394713496
-CD 0.005992091473352066
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CL 0.4299103947134961
+CD 0.00599209147335207
 Driver debug print for iter coord: rank0:pyOptSparse_SNOPT|0
 ------------------------------------------------------------
 Design Vars
@@ -656,108 +645,6 @@ Design Vars
 
 Objectives
 {&#39;cruise.CD&#39;: array([0.00599209])}
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>FD jacobian calcs with dvgeovsp took 0.15299153327941895 seconds in total
-updating the vsp model took 0.10991072654724121 seconds
-evaluating the new points took 0.002866506576538086 seconds
-communication took 0.0002627372741699219 seconds
-Driver debug print for iter coord: rank0:pyOptSparse_SNOPT|1
-------------------------------------------------------------
-Design Vars
-{&#39;WingGeom:XSec_1:Root_Chord&#39;: array([1.000001]),
- &#39;WingGeom:XSec_2:Root_Chord&#39;: array([0.999999]),
- &#39;WingGeom:XSec_3:Root_Chord&#39;: array([1.000001]),
- &#39;WingGeom:XSec_4:Root_Chord&#39;: array([0.999999]),
- &#39;WingGeom:XSec_4:Tip_Chord&#39;: array([1.000001]),
- &#39;cruise.aoa&#39;: array([4.999999])}
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Nonlinear constraints
-{&#39;cruise.CL&#39;: array([0.42991031]), &#39;planform.S_ref&#39;: array([10.])}
-
-Objectives
-{&#39;cruise.CD&#39;: array([0.00599209])}
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Driver debug print for iter coord: rank0:pyOptSparse_SNOPT|2
-------------------------------------------------------------
-Design Vars
-{&#39;WingGeom:XSec_1:Root_Chord&#39;: array([1.1923384]),
- &#39;WingGeom:XSec_2:Root_Chord&#39;: array([1.33584493]),
- &#39;WingGeom:XSec_3:Root_Chord&#39;: array([1.05943977]),
- &#39;WingGeom:XSec_4:Root_Chord&#39;: array([0.62993406]),
- &#39;WingGeom:XSec_4:Tip_Chord&#39;: array([0.7572241]),
- &#39;cruise.aoa&#39;: array([5.58510832])}
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Nonlinear constraints
-{&#39;cruise.CL&#39;: array([0.48846365]), &#39;planform.S_ref&#39;: array([10.])}
-
-Objectives
-{&#39;cruise.CD&#39;: array([0.00755966])}
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>FD jacobian calcs with dvgeovsp took 0.25097227096557617 seconds in total
-updating the vsp model took 0.20206332206726074 seconds
-evaluating the new points took 0.002980470657348633 seconds
-communication took 0.0002014636993408203 seconds
-Driver debug print for iter coord: rank0:pyOptSparse_SNOPT|3
-------------------------------------------------------------
-Design Vars
-{&#39;WingGeom:XSec_1:Root_Chord&#39;: array([0.89473097]),
- &#39;WingGeom:XSec_2:Root_Chord&#39;: array([0.76437144]),
- &#39;WingGeom:XSec_3:Root_Chord&#39;: array([1.25764843]),
- &#39;WingGeom:XSec_4:Root_Chord&#39;: array([1.21193095]),
- &#39;WingGeom:XSec_4:Tip_Chord&#39;: array([0.6373674]),
- &#39;cruise.aoa&#39;: array([5.49025158])}
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Nonlinear constraints
-{&#39;cruise.CL&#39;: array([0.4660347]), &#39;planform.S_ref&#39;: array([10.])}
-
-Objectives
-{&#39;cruise.CD&#39;: array([0.00736325])}
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Driver debug print for iter coord: rank0:pyOptSparse_SNOPT|4
-------------------------------------------------------------
-Design Vars
-{&#39;WingGeom:XSec_1:Root_Chord&#39;: array([1.08683471]),
- &#39;WingGeom:XSec_2:Root_Chord&#39;: array([1.133254]),
- &#39;WingGeom:XSec_3:Root_Chord&#39;: array([1.12970598]),
- &#39;WingGeom:XSec_4:Root_Chord&#39;: array([0.83625559]),
- &#39;WingGeom:XSec_4:Tip_Chord&#39;: array([0.71473415]),
- &#39;cruise.aoa&#39;: array([5.55148101])}
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Nonlinear constraints
-{&#39;cruise.CL&#39;: array([0.48818426]), &#39;planform.S_ref&#39;: array([10.])}
-
-Objectives
-{&#39;cruise.CD&#39;: array([0.00750284])}
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>FD jacobian calcs with dvgeovsp took 0.27674412727355957 seconds in total
-updating the vsp model took 0.2261066436767578 seconds
-evaluating the new points took 0.0029745101928710938 seconds
-communication took 0.0002238750457763672 seconds
-Driver debug print for iter coord: rank0:pyOptSparse_SNOPT|5
-------------------------------------------------------------
-Design Vars
-{&#39;WingGeom:XSec_1:Root_Chord&#39;: array([1.14009194]),
- &#39;WingGeom:XSec_2:Root_Chord&#39;: array([1.1842854]),
- &#39;WingGeom:XSec_3:Root_Chord&#39;: array([1.13326328]),
- &#39;WingGeom:XSec_4:Root_Chord&#39;: array([0.78303945]),
- &#39;WingGeom:XSec_4:Tip_Chord&#39;: array([0.6587318]),
- &#39;cruise.aoa&#39;: array([5.66413494])}
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Nonlinear constraints
-{&#39;cruise.CL&#39;: array([0.49961075]), &#39;planform.S_ref&#39;: array([10.])}
-
-Objectives
-{&#39;cruise.CD&#39;: array([0.00783321])}
 </pre></div>
 </div>
 </div>
