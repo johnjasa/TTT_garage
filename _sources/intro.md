@@ -14,7 +14,7 @@ At NASA, we believe in the importance of promoting open-source technologies. By 
 | Engineering Problem  | Description       | Disciplines Considered | Fidelity Level | Level of Expertise Suggested |
 |----------------------|-------------------|------------------------|----------------|------------------------------|
 | [Aerodynamic Wing Design](aero/aero_example) | Design and optimization of wing geometry for low drag and constrained lift | Aerodynamics | Medium | Intermediate |
-| [Aerostructural Optimization](aerostructural/aerostructural_example) | Integration of aerodynamics and structural design to optimize aircraft performance | Aerodynamics, Structures | Medium | Intermediate |
 | [Battery Thermal Modeling](battery/battery_example) | Modeling and optimization of battery systems for aircraft electrification |  Thermal FEM | High | Advanced |
 | [Aerodynamic Rotor Optimization](rotor_aero/rotor_aero_example) | Rotor design | Aerodynamics, Acoustics | Medium | Advanced |
 | [Aircraft Trajectory Optimization](trajectory/trajectory_example) | Mission profile optimization for a commercial airliner | Trajectory | Low | Beginner |
+| [Aerostructural Optimization](aerostructural/aerostructural_example) | Integration of aerodynamics and structural design to optimize aircraft performance | Aerodynamics, Structures | Medium | Intermediate |
