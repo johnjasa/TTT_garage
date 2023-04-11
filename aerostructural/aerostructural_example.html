@@ -414,7 +414,769 @@ title="Print to PDF"
 \end{split}\]</div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load</span> -r 1-20 oas_example.py
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">openaerostruct.geometry.utils</span> <span class="kn">import</span> <span class="n">generate_mesh</span>
+<span class="kn">from</span> <span class="nn">openaerostruct.integration.aerostruct_groups</span> <span class="kn">import</span> <span class="n">AerostructGeometry</span><span class="p">,</span> <span class="n">AerostructPoint</span>
+<span class="kn">from</span> <span class="nn">openaerostruct.structures.wingbox_fuel_vol_delta</span> <span class="kn">import</span> <span class="n">WingboxFuelVolDelta</span>
+<span class="kn">import</span> <span class="nn">openmdao.api</span> <span class="k">as</span> <span class="nn">om</span>
+
+<span class="c1"># Provide coordinates for a portion of an airfoil for the wingbox cross-section as an nparray with dtype=complex (to work with the complex-step approximation for derivatives).</span>
+<span class="c1"># These should be for an airfoil with the chord scaled to 1.</span>
+<span class="c1"># We use the 10% to 60% portion of the NASA SC2-0612 airfoil for this case</span>
+<span class="c1"># We use the coordinates available from airfoiltools.com. Using such a large number of coordinates is not necessary.</span>
+<span class="c1"># The first and last x-coordinates of the upper and lower surfaces must be the same</span>
+
+<span class="n">upper_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.11</span><span class="p">,</span> <span class="mf">0.12</span><span class="p">,</span> <span class="mf">0.13</span><span class="p">,</span> <span class="mf">0.14</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.16</span><span class="p">,</span> <span class="mf">0.17</span><span class="p">,</span> <span class="mf">0.18</span><span class="p">,</span> <span class="mf">0.19</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.21</span><span class="p">,</span> <span class="mf">0.22</span><span class="p">,</span> <span class="mf">0.23</span><span class="p">,</span> <span class="mf">0.24</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.26</span><span class="p">,</span> <span class="mf">0.27</span><span class="p">,</span> <span class="mf">0.28</span><span class="p">,</span> <span class="mf">0.29</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.31</span><span class="p">,</span> <span class="mf">0.32</span><span class="p">,</span> <span class="mf">0.33</span><span class="p">,</span> <span class="mf">0.34</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">,</span> <span class="mf">0.36</span><span class="p">,</span> <span class="mf">0.37</span><span class="p">,</span> <span class="mf">0.38</span><span class="p">,</span> <span class="mf">0.39</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.41</span><span class="p">,</span> <span class="mf">0.42</span><span class="p">,</span> <span class="mf">0.43</span><span class="p">,</span> <span class="mf">0.44</span><span class="p">,</span> <span class="mf">0.45</span><span class="p">,</span> <span class="mf">0.46</span><span class="p">,</span> <span class="mf">0.47</span><span class="p">,</span> <span class="mf">0.48</span><span class="p">,</span> <span class="mf">0.49</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.51</span><span class="p">,</span> <span class="mf">0.52</span><span class="p">,</span> <span class="mf">0.53</span><span class="p">,</span> <span class="mf">0.54</span><span class="p">,</span> <span class="mf">0.55</span><span class="p">,</span> <span class="mf">0.56</span><span class="p">,</span> <span class="mf">0.57</span><span class="p">,</span> <span class="mf">0.58</span><span class="p">,</span> <span class="mf">0.59</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;complex128&quot;</span><span class="p">)</span>
+<span class="n">lower_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.11</span><span class="p">,</span> <span class="mf">0.12</span><span class="p">,</span> <span class="mf">0.13</span><span class="p">,</span> <span class="mf">0.14</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.16</span><span class="p">,</span> <span class="mf">0.17</span><span class="p">,</span> <span class="mf">0.18</span><span class="p">,</span> <span class="mf">0.19</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.21</span><span class="p">,</span> <span class="mf">0.22</span><span class="p">,</span> <span class="mf">0.23</span><span class="p">,</span> <span class="mf">0.24</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.26</span><span class="p">,</span> <span class="mf">0.27</span><span class="p">,</span> <span class="mf">0.28</span><span class="p">,</span> <span class="mf">0.29</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.31</span><span class="p">,</span> <span class="mf">0.32</span><span class="p">,</span> <span class="mf">0.33</span><span class="p">,</span> <span class="mf">0.34</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">,</span> <span class="mf">0.36</span><span class="p">,</span> <span class="mf">0.37</span><span class="p">,</span> <span class="mf">0.38</span><span class="p">,</span> <span class="mf">0.39</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.41</span><span class="p">,</span> <span class="mf">0.42</span><span class="p">,</span> <span class="mf">0.43</span><span class="p">,</span> <span class="mf">0.44</span><span class="p">,</span> <span class="mf">0.45</span><span class="p">,</span> <span class="mf">0.46</span><span class="p">,</span> <span class="mf">0.47</span><span class="p">,</span> <span class="mf">0.48</span><span class="p">,</span> <span class="mf">0.49</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.51</span><span class="p">,</span> <span class="mf">0.52</span><span class="p">,</span> <span class="mf">0.53</span><span class="p">,</span> <span class="mf">0.54</span><span class="p">,</span> <span class="mf">0.55</span><span class="p">,</span> <span class="mf">0.56</span><span class="p">,</span> <span class="mf">0.57</span><span class="p">,</span> <span class="mf">0.58</span><span class="p">,</span> <span class="mf">0.59</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;complex128&quot;</span><span class="p">)</span>
+<span class="n">upper_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span> <span class="mf">0.0447</span><span class="p">,</span>  <span class="mf">0.046</span><span class="p">,</span>  <span class="mf">0.0472</span><span class="p">,</span>  <span class="mf">0.0484</span><span class="p">,</span>  <span class="mf">0.0495</span><span class="p">,</span>  <span class="mf">0.0505</span><span class="p">,</span>  <span class="mf">0.0514</span><span class="p">,</span>  <span class="mf">0.0523</span><span class="p">,</span>  <span class="mf">0.0531</span><span class="p">,</span>  <span class="mf">0.0538</span><span class="p">,</span> <span class="mf">0.0545</span><span class="p">,</span>  <span class="mf">0.0551</span><span class="p">,</span>  <span class="mf">0.0557</span><span class="p">,</span> <span class="mf">0.0563</span><span class="p">,</span>  <span class="mf">0.0568</span><span class="p">,</span> <span class="mf">0.0573</span><span class="p">,</span>  <span class="mf">0.0577</span><span class="p">,</span>  <span class="mf">0.0581</span><span class="p">,</span>  <span class="mf">0.0585</span><span class="p">,</span>  <span class="mf">0.0588</span><span class="p">,</span>  <span class="mf">0.0591</span><span class="p">,</span>  <span class="mf">0.0593</span><span class="p">,</span>  <span class="mf">0.0595</span><span class="p">,</span>  <span class="mf">0.0597</span><span class="p">,</span>  <span class="mf">0.0599</span><span class="p">,</span>  <span class="mf">0.06</span><span class="p">,</span>    <span class="mf">0.0601</span><span class="p">,</span>  <span class="mf">0.0602</span><span class="p">,</span>  <span class="mf">0.0602</span><span class="p">,</span>  <span class="mf">0.0602</span><span class="p">,</span>  <span class="mf">0.0602</span><span class="p">,</span>  <span class="mf">0.0602</span><span class="p">,</span>  <span class="mf">0.0601</span><span class="p">,</span>  <span class="mf">0.06</span><span class="p">,</span>    <span class="mf">0.0599</span><span class="p">,</span>  <span class="mf">0.0598</span><span class="p">,</span>  <span class="mf">0.0596</span><span class="p">,</span>  <span class="mf">0.0594</span><span class="p">,</span>  <span class="mf">0.0592</span><span class="p">,</span>  <span class="mf">0.0589</span><span class="p">,</span>  <span class="mf">0.0586</span><span class="p">,</span>  <span class="mf">0.0583</span><span class="p">,</span>  <span class="mf">0.058</span><span class="p">,</span>   <span class="mf">0.0576</span><span class="p">,</span>  <span class="mf">0.0572</span><span class="p">,</span>  <span class="mf">0.0568</span><span class="p">,</span>  <span class="mf">0.0563</span><span class="p">,</span>  <span class="mf">0.0558</span><span class="p">,</span>  <span class="mf">0.0553</span><span class="p">,</span>  <span class="mf">0.0547</span><span class="p">,</span>  <span class="mf">0.0541</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;complex128&quot;</span><span class="p">)</span>  <span class="c1"># noqa: E201, E241</span>
+<span class="n">lower_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">0.0447</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.046</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0473</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0485</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0496</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0506</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0515</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0524</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0532</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.054</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0547</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0554</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.056</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0565</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.057</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0575</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0579</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0583</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0586</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0589</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0592</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0594</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0595</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0596</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0597</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0598</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0598</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0598</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0598</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0597</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0596</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0594</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0592</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0589</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0586</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0582</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0578</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0573</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0567</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0561</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0554</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0546</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0538</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0529</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0519</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0509</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0497</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0485</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0472</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0458</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0444</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;complex128&quot;</span><span class="p">)</span>
+
+<span class="c1"># Create a dictionary to store options about the surface</span>
+<span class="n">mesh_dict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;num_y&quot;</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span>
+    <span class="s2">&quot;num_x&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s2">&quot;wing_type&quot;</span><span class="p">:</span> <span class="s2">&quot;uCRM_based&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;symmetry&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">&quot;chord_cos_spacing&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s2">&quot;span_cos_spacing&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s2">&quot;num_twist_cp&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">mesh</span><span class="p">,</span> <span class="n">twist_cp</span> <span class="o">=</span> <span class="n">generate_mesh</span><span class="p">(</span><span class="n">mesh_dict</span><span class="p">)</span>
+
+<span class="n">surf_dict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1"># Wing definition</span>
+    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;wing&quot;</span><span class="p">,</span>  <span class="c1"># give the surface some name</span>
+    <span class="s2">&quot;symmetry&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># if True, model only one half of the lifting surface</span>
+    <span class="s2">&quot;S_ref_type&quot;</span><span class="p">:</span> <span class="s2">&quot;projected&quot;</span><span class="p">,</span>  <span class="c1"># how we compute the wing area,</span>
+    <span class="c1"># can be &#39;wetted&#39; or &#39;projected&#39;</span>
+    <span class="s2">&quot;mesh&quot;</span><span class="p">:</span> <span class="n">mesh</span><span class="p">,</span>
+    <span class="s2">&quot;fem_model_type&quot;</span><span class="p">:</span> <span class="s2">&quot;wingbox&quot;</span><span class="p">,</span>  <span class="c1"># &#39;wingbox&#39; or &#39;tube&#39;</span>
+    <span class="s2">&quot;data_x_upper&quot;</span><span class="p">:</span> <span class="n">upper_x</span><span class="p">,</span>
+    <span class="s2">&quot;data_x_lower&quot;</span><span class="p">:</span> <span class="n">lower_x</span><span class="p">,</span>
+    <span class="s2">&quot;data_y_upper&quot;</span><span class="p">:</span> <span class="n">upper_y</span><span class="p">,</span>
+    <span class="s2">&quot;data_y_lower&quot;</span><span class="p">:</span> <span class="n">lower_y</span><span class="p">,</span>
+    <span class="c1"># docs checkpoint 4</span>
+    <span class="s2">&quot;twist_cp&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">,</span> <span class="mf">9.0</span><span class="p">]),</span>  <span class="c1"># [deg]</span>
+    <span class="s2">&quot;spar_thickness_cp&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.004</span><span class="p">,</span> <span class="mf">0.005</span><span class="p">,</span> <span class="mf">0.008</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">]),</span>  <span class="c1"># [m]</span>
+    <span class="s2">&quot;skin_thickness_cp&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.005</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.015</span><span class="p">,</span> <span class="mf">0.025</span><span class="p">]),</span>  <span class="c1"># [m]</span>
+    <span class="s2">&quot;t_over_c_cp&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.08</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">,</span> <span class="mf">0.10</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">]),</span>
+    <span class="s2">&quot;original_wingbox_airfoil_t_over_c&quot;</span><span class="p">:</span> <span class="mf">0.12</span><span class="p">,</span>
+    <span class="c1"># docs checkpoint 5</span>
+    <span class="c1"># Aerodynamic deltas.</span>
+    <span class="c1"># These CL0 and CD0 values are added to the CL and CD</span>
+    <span class="c1"># obtained from aerodynamic analysis of the surface to get</span>
+    <span class="c1"># the total CL and CD.</span>
+    <span class="c1"># These CL0 and CD0 values do not vary wrt alpha.</span>
+    <span class="c1"># They can be used to account for things that are not included, such as contributions from the fuselage, camber, etc.</span>
+    <span class="s2">&quot;CL0&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>  <span class="c1"># CL delta</span>
+    <span class="s2">&quot;CD0&quot;</span><span class="p">:</span> <span class="mf">0.0078</span><span class="p">,</span>  <span class="c1"># CD delta</span>
+    <span class="s2">&quot;with_viscous&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># if true, compute viscous drag</span>
+    <span class="s2">&quot;with_wave&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># if true, compute wave drag</span>
+    <span class="c1"># Airfoil properties for viscous drag calculation</span>
+    <span class="s2">&quot;k_lam&quot;</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span>  <span class="c1"># fraction of chord with laminar</span>
+    <span class="c1"># flow, used for viscous drag</span>
+    <span class="s2">&quot;c_max_t&quot;</span><span class="p">:</span> <span class="mf">0.38</span><span class="p">,</span>  <span class="c1"># chordwise location of maximum thickness</span>
+    <span class="c1"># docs checkpoint 6</span>
+    <span class="c1"># Structural values are based on aluminum 7075</span>
+    <span class="s2">&quot;E&quot;</span><span class="p">:</span> <span class="mf">73.1e9</span><span class="p">,</span>  <span class="c1"># [Pa] Young&#39;s modulus</span>
+    <span class="s2">&quot;G&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">73.1e9</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">/</span> <span class="mf">1.33</span><span class="p">),</span>  <span class="c1"># [Pa] shear modulus (calculated using E and the Poisson&#39;s ratio here)</span>
+    <span class="s2">&quot;yield&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">420.0e6</span> <span class="o">/</span> <span class="mf">1.5</span><span class="p">),</span>  <span class="c1"># [Pa] allowable yield stress</span>
+    <span class="s2">&quot;mrho&quot;</span><span class="p">:</span> <span class="mf">2.78e3</span><span class="p">,</span>  <span class="c1"># [kg/m^3] material density</span>
+    <span class="s2">&quot;strength_factor_for_upper_skin&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>  <span class="c1"># the yield stress is multiplied by this factor for the upper skin</span>
+    <span class="s2">&quot;wing_weight_ratio&quot;</span><span class="p">:</span> <span class="mf">1.25</span><span class="p">,</span>
+    <span class="s2">&quot;exact_failure_constraint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># if false, use KS function</span>
+    <span class="c1"># docs checkpoint 7</span>
+    <span class="s2">&quot;struct_weight_relief&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">&quot;distributed_fuel_weight&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">&quot;n_point_masses&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># number of point masses in the system; in this case, the engine (omit option if no point masses)</span>
+    <span class="c1"># docs checkpoint 8</span>
+    <span class="s2">&quot;fuel_density&quot;</span><span class="p">:</span> <span class="mf">803.0</span><span class="p">,</span>  <span class="c1"># [kg/m^3] fuel density (only needed if the fuel-in-wing volume constraint is used)</span>
+    <span class="s2">&quot;Wf_reserve&quot;</span><span class="p">:</span> <span class="mf">15000.0</span><span class="p">,</span>  <span class="c1"># [kg] reserve fuel mass</span>
+<span class="p">}</span>
+
+<span class="n">surfaces</span> <span class="o">=</span> <span class="p">[</span><span class="n">surf_dict</span><span class="p">]</span>
+
+<span class="c1"># Create the problem and assign the model group</span>
+<span class="n">prob</span> <span class="o">=</span> <span class="n">om</span><span class="o">.</span><span class="n">Problem</span><span class="p">()</span>
+
+<span class="c1"># Add problem information as an independent variables component</span>
+<span class="n">indep_var_comp</span> <span class="o">=</span> <span class="n">om</span><span class="o">.</span><span class="n">IndepVarComp</span><span class="p">()</span>
+<span class="n">indep_var_comp</span><span class="o">.</span><span class="n">add_output</span><span class="p">(</span><span class="s2">&quot;Mach_number&quot;</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.85</span><span class="p">,</span> <span class="mf">0.64</span><span class="p">]))</span>
+<span class="n">indep_var_comp</span><span class="o">.</span><span class="n">add_output</span><span class="p">(</span><span class="s2">&quot;v&quot;</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.85</span> <span class="o">*</span> <span class="mf">295.07</span><span class="p">,</span> <span class="mf">0.64</span> <span class="o">*</span> <span class="mf">340.294</span><span class="p">]),</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;m/s&quot;</span><span class="p">)</span>
+<span class="n">indep_var_comp</span><span class="o">.</span><span class="n">add_output</span><span class="p">(</span>
+    <span class="s2">&quot;re&quot;</span><span class="p">,</span>
+    <span class="n">val</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.348</span> <span class="o">*</span> <span class="mf">295.07</span> <span class="o">*</span> <span class="mf">0.85</span> <span class="o">*</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.43</span> <span class="o">*</span> <span class="mf">1e-5</span><span class="p">),</span> <span class="mf">1.225</span> <span class="o">*</span> <span class="mf">340.294</span> <span class="o">*</span> <span class="mf">0.64</span> <span class="o">*</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.81206</span> <span class="o">*</span> <span class="mf">1e-5</span><span class="p">)]),</span>
+    <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/m&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">indep_var_comp</span><span class="o">.</span><span class="n">add_output</span><span class="p">(</span><span class="s2">&quot;rho&quot;</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.348</span><span class="p">,</span> <span class="mf">1.225</span><span class="p">]),</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;kg/m**3&quot;</span><span class="p">)</span>
+<span class="n">indep_var_comp</span><span class="o">.</span><span class="n">add_output</span><span class="p">(</span><span class="s2">&quot;speed_of_sound&quot;</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">295.07</span><span class="p">,</span> <span class="mf">340.294</span><span class="p">]),</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;m/s&quot;</span><span class="p">)</span>
+
+<span class="n">indep_var_comp</span><span class="o">.</span><span class="n">add_output</span><span class="p">(</span><span class="s2">&quot;CT&quot;</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="mf">0.53</span> <span class="o">/</span> <span class="mi">3600</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/s&quot;</span><span class="p">)</span>
+<span class="n">indep_var_comp</span><span class="o">.</span><span class="n">add_output</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="mf">14.307e6</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;m&quot;</span><span class="p">)</span>
+<span class="n">indep_var_comp</span><span class="o">.</span><span class="n">add_output</span><span class="p">(</span><span class="s2">&quot;W0_without_point_masses&quot;</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="mi">128000</span> <span class="o">+</span> <span class="n">surf_dict</span><span class="p">[</span><span class="s2">&quot;Wf_reserve&quot;</span><span class="p">],</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;kg&quot;</span><span class="p">)</span>
+
+<span class="n">indep_var_comp</span><span class="o">.</span><span class="n">add_output</span><span class="p">(</span><span class="s2">&quot;load_factor&quot;</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">]))</span>
+<span class="n">indep_var_comp</span><span class="o">.</span><span class="n">add_output</span><span class="p">(</span><span class="s2">&quot;alpha&quot;</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">)</span>
+<span class="n">indep_var_comp</span><span class="o">.</span><span class="n">add_output</span><span class="p">(</span><span class="s2">&quot;alpha_maneuver&quot;</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">)</span>
+
+<span class="n">indep_var_comp</span><span class="o">.</span><span class="n">add_output</span><span class="p">(</span><span class="s2">&quot;empty_cg&quot;</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">)),</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;m&quot;</span><span class="p">)</span>
+
+<span class="n">indep_var_comp</span><span class="o">.</span><span class="n">add_output</span><span class="p">(</span><span class="s2">&quot;fuel_mass&quot;</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="mf">10000.0</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;kg&quot;</span><span class="p">)</span>
+
+<span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">add_subsystem</span><span class="p">(</span><span class="s2">&quot;prob_vars&quot;</span><span class="p">,</span> <span class="n">indep_var_comp</span><span class="p">,</span> <span class="n">promotes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">])</span>
+
+<span class="n">point_masses</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">10.0e3</span><span class="p">]])</span>
+
+<span class="n">point_mass_locations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">25</span><span class="p">,</span> <span class="o">-</span><span class="mf">10.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]])</span>
+
+<span class="n">indep_var_comp</span><span class="o">.</span><span class="n">add_output</span><span class="p">(</span><span class="s2">&quot;point_masses&quot;</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="n">point_masses</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;kg&quot;</span><span class="p">)</span>
+<span class="n">indep_var_comp</span><span class="o">.</span><span class="n">add_output</span><span class="p">(</span><span class="s2">&quot;point_mass_locations&quot;</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="n">point_mass_locations</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;m&quot;</span><span class="p">)</span>
+
+<span class="c1"># Compute the actual W0 to be used within OAS based on the sum of the point mass and other W0 weight</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">add_subsystem</span><span class="p">(</span>
+    <span class="s2">&quot;W0_comp&quot;</span><span class="p">,</span> <span class="n">om</span><span class="o">.</span><span class="n">ExecComp</span><span class="p">(</span><span class="s2">&quot;W0 = W0_without_point_masses + 2 * sum(point_masses)&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;kg&quot;</span><span class="p">),</span> <span class="n">promotes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+
+<span class="c1"># Loop over each surface in the surfaces list</span>
+<span class="k">for</span> <span class="n">surface</span> <span class="ow">in</span> <span class="n">surfaces</span><span class="p">:</span>
+    <span class="c1"># Get the surface name and create a group to contain components</span>
+    <span class="c1"># only for this surface</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">surface</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+
+    <span class="n">aerostruct_group</span> <span class="o">=</span> <span class="n">AerostructGeometry</span><span class="p">(</span><span class="n">surface</span><span class="o">=</span><span class="n">surface</span><span class="p">)</span>
+
+    <span class="c1"># Add groups to the problem with the name of the surface.</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">add_subsystem</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">aerostruct_group</span><span class="p">)</span>
+
+<span class="c1"># Loop through and add a certain number of aerostruct points</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+    <span class="n">point_name</span> <span class="o">=</span> <span class="s2">&quot;AS_point_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="c1"># Connect the parameters within the model for each aero point</span>
+
+    <span class="c1"># Create the aerostruct point group and add it to the model</span>
+    <span class="n">AS_point</span> <span class="o">=</span> <span class="n">AerostructPoint</span><span class="p">(</span><span class="n">surfaces</span><span class="o">=</span><span class="n">surfaces</span><span class="p">,</span> <span class="n">internally_connect_fuelburn</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">add_subsystem</span><span class="p">(</span><span class="n">point_name</span><span class="p">,</span> <span class="n">AS_point</span><span class="p">)</span>
+
+    <span class="c1"># Connect flow properties to the analysis point</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;v&quot;</span><span class="p">,</span> <span class="n">point_name</span> <span class="o">+</span> <span class="s2">&quot;.v&quot;</span><span class="p">,</span> <span class="n">src_indices</span><span class="o">=</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;Mach_number&quot;</span><span class="p">,</span> <span class="n">point_name</span> <span class="o">+</span> <span class="s2">&quot;.Mach_number&quot;</span><span class="p">,</span> <span class="n">src_indices</span><span class="o">=</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;re&quot;</span><span class="p">,</span> <span class="n">point_name</span> <span class="o">+</span> <span class="s2">&quot;.re&quot;</span><span class="p">,</span> <span class="n">src_indices</span><span class="o">=</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;rho&quot;</span><span class="p">,</span> <span class="n">point_name</span> <span class="o">+</span> <span class="s2">&quot;.rho&quot;</span><span class="p">,</span> <span class="n">src_indices</span><span class="o">=</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;CT&quot;</span><span class="p">,</span> <span class="n">point_name</span> <span class="o">+</span> <span class="s2">&quot;.CT&quot;</span><span class="p">)</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">,</span> <span class="n">point_name</span> <span class="o">+</span> <span class="s2">&quot;.R&quot;</span><span class="p">)</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;W0&quot;</span><span class="p">,</span> <span class="n">point_name</span> <span class="o">+</span> <span class="s2">&quot;.W0&quot;</span><span class="p">)</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;speed_of_sound&quot;</span><span class="p">,</span> <span class="n">point_name</span> <span class="o">+</span> <span class="s2">&quot;.speed_of_sound&quot;</span><span class="p">,</span> <span class="n">src_indices</span><span class="o">=</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;empty_cg&quot;</span><span class="p">,</span> <span class="n">point_name</span> <span class="o">+</span> <span class="s2">&quot;.empty_cg&quot;</span><span class="p">)</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;load_factor&quot;</span><span class="p">,</span> <span class="n">point_name</span> <span class="o">+</span> <span class="s2">&quot;.load_factor&quot;</span><span class="p">,</span> <span class="n">src_indices</span><span class="o">=</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;fuel_mass&quot;</span><span class="p">,</span> <span class="n">point_name</span> <span class="o">+</span> <span class="s2">&quot;.total_perf.L_equals_W.fuelburn&quot;</span><span class="p">)</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;fuel_mass&quot;</span><span class="p">,</span> <span class="n">point_name</span> <span class="o">+</span> <span class="s2">&quot;.total_perf.CG.fuelburn&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">surface</span> <span class="ow">in</span> <span class="n">surfaces</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">surface</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">surf_dict</span><span class="p">[</span><span class="s2">&quot;distributed_fuel_weight&quot;</span><span class="p">]:</span>
+            <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;load_factor&quot;</span><span class="p">,</span> <span class="n">point_name</span> <span class="o">+</span> <span class="s2">&quot;.coupled.load_factor&quot;</span><span class="p">,</span> <span class="n">src_indices</span><span class="o">=</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="n">com_name</span> <span class="o">=</span> <span class="n">point_name</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_perf.&quot;</span>
+        <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
+            <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.local_stiff_transformed&quot;</span><span class="p">,</span> <span class="n">point_name</span> <span class="o">+</span> <span class="s2">&quot;.coupled.&quot;</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.local_stiff_transformed&quot;</span>
+        <span class="p">)</span>
+        <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.nodes&quot;</span><span class="p">,</span> <span class="n">point_name</span> <span class="o">+</span> <span class="s2">&quot;.coupled.&quot;</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.nodes&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Connect aerodyamic mesh to coupled group mesh</span>
+        <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.mesh&quot;</span><span class="p">,</span> <span class="n">point_name</span> <span class="o">+</span> <span class="s2">&quot;.coupled.&quot;</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.mesh&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">surf_dict</span><span class="p">[</span><span class="s2">&quot;struct_weight_relief&quot;</span><span class="p">]:</span>
+            <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.element_mass&quot;</span><span class="p">,</span> <span class="n">point_name</span> <span class="o">+</span> <span class="s2">&quot;.coupled.&quot;</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.element_mass&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Connect performance calculation variables</span>
+        <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.nodes&quot;</span><span class="p">,</span> <span class="n">com_name</span> <span class="o">+</span> <span class="s2">&quot;nodes&quot;</span><span class="p">)</span>
+        <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.cg_location&quot;</span><span class="p">,</span> <span class="n">point_name</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="s2">&quot;total_perf.&quot;</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_cg_location&quot;</span><span class="p">)</span>
+        <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.structural_mass&quot;</span><span class="p">,</span> <span class="n">point_name</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="s2">&quot;total_perf.&quot;</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_structural_mass&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Connect wingbox properties to von Mises stress calcs</span>
+        <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.Qz&quot;</span><span class="p">,</span> <span class="n">com_name</span> <span class="o">+</span> <span class="s2">&quot;Qz&quot;</span><span class="p">)</span>
+        <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.J&quot;</span><span class="p">,</span> <span class="n">com_name</span> <span class="o">+</span> <span class="s2">&quot;J&quot;</span><span class="p">)</span>
+        <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.A_enc&quot;</span><span class="p">,</span> <span class="n">com_name</span> <span class="o">+</span> <span class="s2">&quot;A_enc&quot;</span><span class="p">)</span>
+        <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.htop&quot;</span><span class="p">,</span> <span class="n">com_name</span> <span class="o">+</span> <span class="s2">&quot;htop&quot;</span><span class="p">)</span>
+        <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.hbottom&quot;</span><span class="p">,</span> <span class="n">com_name</span> <span class="o">+</span> <span class="s2">&quot;hbottom&quot;</span><span class="p">)</span>
+        <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.hfront&quot;</span><span class="p">,</span> <span class="n">com_name</span> <span class="o">+</span> <span class="s2">&quot;hfront&quot;</span><span class="p">)</span>
+        <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.hrear&quot;</span><span class="p">,</span> <span class="n">com_name</span> <span class="o">+</span> <span class="s2">&quot;hrear&quot;</span><span class="p">)</span>
+
+        <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.spar_thickness&quot;</span><span class="p">,</span> <span class="n">com_name</span> <span class="o">+</span> <span class="s2">&quot;spar_thickness&quot;</span><span class="p">)</span>
+        <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.t_over_c&quot;</span><span class="p">,</span> <span class="n">com_name</span> <span class="o">+</span> <span class="s2">&quot;t_over_c&quot;</span><span class="p">)</span>
+
+        <span class="n">coupled_name</span> <span class="o">=</span> <span class="n">point_name</span> <span class="o">+</span> <span class="s2">&quot;.coupled.&quot;</span> <span class="o">+</span> <span class="n">name</span>
+        <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;point_masses&quot;</span><span class="p">,</span> <span class="n">coupled_name</span> <span class="o">+</span> <span class="s2">&quot;.point_masses&quot;</span><span class="p">)</span>
+        <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;point_mass_locations&quot;</span><span class="p">,</span> <span class="n">coupled_name</span> <span class="o">+</span> <span class="s2">&quot;.point_mass_locations&quot;</span><span class="p">)</span>
+
+
+
+<span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;alpha&quot;</span><span class="p">,</span> <span class="s2">&quot;AS_point_0&quot;</span> <span class="o">+</span> <span class="s2">&quot;.alpha&quot;</span><span class="p">)</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;alpha_maneuver&quot;</span><span class="p">,</span> <span class="s2">&quot;AS_point_1&quot;</span> <span class="o">+</span> <span class="s2">&quot;.alpha&quot;</span><span class="p">)</span>
+
+<span class="c1"># Here we add the fuel volume constraint componenet to the model</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">add_subsystem</span><span class="p">(</span><span class="s2">&quot;fuel_vol_delta&quot;</span><span class="p">,</span> <span class="n">WingboxFuelVolDelta</span><span class="p">(</span><span class="n">surface</span><span class="o">=</span><span class="n">surface</span><span class="p">))</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;wing.struct_setup.fuel_vols&quot;</span><span class="p">,</span> <span class="s2">&quot;fuel_vol_delta.fuel_vols&quot;</span><span class="p">)</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;AS_point_0.fuelburn&quot;</span><span class="p">,</span> <span class="s2">&quot;fuel_vol_delta.fuelburn&quot;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">surf_dict</span><span class="p">[</span><span class="s2">&quot;distributed_fuel_weight&quot;</span><span class="p">]:</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;wing.struct_setup.fuel_vols&quot;</span><span class="p">,</span> <span class="s2">&quot;AS_point_0.coupled.wing.struct_states.fuel_vols&quot;</span><span class="p">)</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;fuel_mass&quot;</span><span class="p">,</span> <span class="s2">&quot;AS_point_0.coupled.wing.struct_states.fuel_mass&quot;</span><span class="p">)</span>
+
+    <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;wing.struct_setup.fuel_vols&quot;</span><span class="p">,</span> <span class="s2">&quot;AS_point_1.coupled.wing.struct_states.fuel_vols&quot;</span><span class="p">)</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;fuel_mass&quot;</span><span class="p">,</span> <span class="s2">&quot;AS_point_1.coupled.wing.struct_states.fuel_mass&quot;</span><span class="p">)</span>
+
+<span class="n">comp</span> <span class="o">=</span> <span class="n">om</span><span class="o">.</span><span class="n">ExecComp</span><span class="p">(</span><span class="s2">&quot;fuel_diff = (fuel_mass - fuelburn) / fuelburn&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;kg&quot;</span><span class="p">)</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">add_subsystem</span><span class="p">(</span><span class="s2">&quot;fuel_diff&quot;</span><span class="p">,</span> <span class="n">comp</span><span class="p">,</span> <span class="n">promotes_inputs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;fuel_mass&quot;</span><span class="p">],</span> <span class="n">promotes_outputs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;fuel_diff&quot;</span><span class="p">])</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;AS_point_0.fuelburn&quot;</span><span class="p">,</span> <span class="s2">&quot;fuel_diff.fuelburn&quot;</span><span class="p">)</span>
+
+<span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="s2">&quot;AS_point_0.fuelburn&quot;</span><span class="p">,</span> <span class="n">scaler</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span>
+
+<span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">add_design_var</span><span class="p">(</span><span class="s2">&quot;wing.twist_cp&quot;</span><span class="p">,</span> <span class="n">lower</span><span class="o">=-</span><span class="mf">15.0</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="mf">15.0</span><span class="p">,</span> <span class="n">scaler</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">add_design_var</span><span class="p">(</span><span class="s2">&quot;wing.spar_thickness_cp&quot;</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="mf">0.003</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">scaler</span><span class="o">=</span><span class="mf">1e2</span><span class="p">)</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">add_design_var</span><span class="p">(</span><span class="s2">&quot;wing.skin_thickness_cp&quot;</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="mf">0.003</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">scaler</span><span class="o">=</span><span class="mf">1e2</span><span class="p">)</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">add_design_var</span><span class="p">(</span><span class="s2">&quot;wing.geometry.t_over_c_cp&quot;</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="mf">0.07</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">scaler</span><span class="o">=</span><span class="mf">10.0</span><span class="p">)</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">add_design_var</span><span class="p">(</span><span class="s2">&quot;alpha_maneuver&quot;</span><span class="p">,</span> <span class="n">lower</span><span class="o">=-</span><span class="mf">15.0</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+
+<span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">add_constraint</span><span class="p">(</span><span class="s2">&quot;AS_point_0.CL&quot;</span><span class="p">,</span> <span class="n">equals</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+<span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">add_constraint</span><span class="p">(</span><span class="s2">&quot;AS_point_1.L_equals_W&quot;</span><span class="p">,</span> <span class="n">equals</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">add_constraint</span><span class="p">(</span><span class="s2">&quot;AS_point_1.wing_perf.failure&quot;</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+
+<span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">add_constraint</span><span class="p">(</span><span class="s2">&quot;fuel_vol_delta.fuel_vol_delta&quot;</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+
+<span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">add_design_var</span><span class="p">(</span><span class="s2">&quot;fuel_mass&quot;</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="mf">2e5</span><span class="p">,</span> <span class="n">scaler</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">add_constraint</span><span class="p">(</span><span class="s2">&quot;fuel_diff&quot;</span><span class="p">,</span> <span class="n">equals</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+
+<span class="n">prob</span><span class="o">.</span><span class="n">driver</span> <span class="o">=</span> <span class="n">om</span><span class="o">.</span><span class="n">ScipyOptimizeDriver</span><span class="p">()</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="s2">&quot;optimizer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;SLSQP&quot;</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="s2">&quot;tol&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e-2</span>
+
+<span class="n">recorder</span> <span class="o">=</span> <span class="n">om</span><span class="o">.</span><span class="n">SqliteRecorder</span><span class="p">(</span><span class="s2">&quot;aerostruct.db&quot;</span><span class="p">)</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">add_recorder</span><span class="p">(</span><span class="n">recorder</span><span class="p">)</span>
+
+<span class="c1"># We could also just use prob.driver.recording_options[&#39;includes&#39;]=[&#39;*&#39;] here, but for large meshes the database file becomes extremely large. So we just select the variables we need.</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">recording_options</span><span class="p">[</span><span class="s2">&quot;includes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;alpha&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;rho&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;v&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;cg&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AS_point_1.cg&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AS_point_0.cg&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AS_point_0.coupled.wing_loads.loads&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AS_point_1.coupled.wing_loads.loads&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AS_point_0.coupled.wing.normals&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AS_point_1.coupled.wing.normals&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AS_point_0.coupled.wing.widths&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AS_point_1.coupled.wing.widths&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AS_point_0.coupled.aero_states.wing_sec_forces&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AS_point_1.coupled.aero_states.wing_sec_forces&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AS_point_0.wing_perf.CL1&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AS_point_1.wing_perf.CL1&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AS_point_0.coupled.wing.S_ref&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AS_point_1.coupled.wing.S_ref&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;wing.geometry.twist&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;wing.mesh&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;wing.skin_thickness&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;wing.spar_thickness&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;wing.t_over_c&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;wing.structural_mass&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AS_point_0.wing_perf.vonmises&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AS_point_1.wing_perf.vonmises&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AS_point_0.coupled.wing.def_mesh&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AS_point_1.coupled.wing.def_mesh&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="n">prob</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">recording_options</span><span class="p">[</span><span class="s2">&quot;record_objectives&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">recording_options</span><span class="p">[</span><span class="s2">&quot;record_constraints&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">recording_options</span><span class="p">[</span><span class="s2">&quot;record_desvars&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">recording_options</span><span class="p">[</span><span class="s2">&quot;record_inputs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="c1"># Set up the problem</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
+
+<span class="n">prob</span><span class="o">.</span><span class="n">run_driver</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The fuel burn value is&quot;</span><span class="p">,</span> <span class="n">prob</span><span class="p">[</span><span class="s2">&quot;AS_point_0.fuelburn&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;[kg]&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="s2">&quot;The wingbox mass (excluding the wing_weight_ratio) is&quot;</span><span class="p">,</span>
+    <span class="n">prob</span><span class="p">[</span><span class="s2">&quot;wing.structural_mass&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">surf_dict</span><span class="p">[</span><span class="s2">&quot;wing_weight_ratio&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;[kg]&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/mnt/c/Users/John/Dropbox/git/OpenAeroStruct/openaerostruct/structures/compute_nodes.py:52: ComplexWarning: Casting complex values to real discards the imaginary part
+  data[:n] = 1 - w
+/mnt/c/Users/John/Dropbox/git/OpenAeroStruct/openaerostruct/structures/compute_nodes.py:53: ComplexWarning: Casting complex values to real discards the imaginary part
+  data[n:] = w
+/mnt/c/Users/John/Dropbox/git/openmdao/openmdao/utils/general_utils.py:111: ComplexWarning: Casting complex values to real discards the imaginary part
+  value = np.atleast_1d(value).astype(np.float64)
+/mnt/c/Users/John/Dropbox/git/OpenAeroStruct/openaerostruct/transfer/load_transfer.py:49: ComplexWarning: Casting complex values to real discards the imaginary part
+  self.fem_origin = float(fem_origin)
+/mnt/c/Users/John/Dropbox/git/openmdao/openmdao/core/system.py:2695: PromotionWarning:&#39;AS_point_0.coupled.wing.struct_states&#39; &lt;class SpatialBeamStates&gt;: input variable &#39;load_factor&#39;, promoted using &#39;load_factor&#39;, was already promoted using &#39;load_factor&#39;.
+/mnt/c/Users/John/Dropbox/git/openmdao/openmdao/core/system.py:2695: PromotionWarning:&#39;AS_point_0.coupled.wing.struct_states&#39; &lt;class SpatialBeamStates&gt;: input variable &#39;nodes&#39;, promoted using &#39;nodes&#39;, was already promoted using &#39;nodes&#39;.
+/mnt/c/Users/John/Dropbox/git/openmdao/openmdao/core/system.py:2695: PromotionWarning:&#39;AS_point_0.coupled.wing.struct_states&#39; &lt;class SpatialBeamStates&gt;: input variable &#39;load_factor&#39;, promoted using &#39;load_factor&#39;, was already promoted using &#39;load_factor&#39;.
+/mnt/c/Users/John/Dropbox/git/openmdao/openmdao/core/system.py:2695: PromotionWarning:&#39;AS_point_0.coupled.wing.struct_states&#39; &lt;class SpatialBeamStates&gt;: input variable &#39;nodes&#39;, promoted using &#39;nodes&#39;, was already promoted using &#39;nodes&#39;.
+/mnt/c/Users/John/Dropbox/git/openmdao/openmdao/core/system.py:2695: PromotionWarning:&#39;AS_point_1.coupled.wing.struct_states&#39; &lt;class SpatialBeamStates&gt;: input variable &#39;load_factor&#39;, promoted using &#39;load_factor&#39;, was already promoted using &#39;load_factor&#39;.
+/mnt/c/Users/John/Dropbox/git/openmdao/openmdao/core/system.py:2695: PromotionWarning:&#39;AS_point_1.coupled.wing.struct_states&#39; &lt;class SpatialBeamStates&gt;: input variable &#39;nodes&#39;, promoted using &#39;nodes&#39;, was already promoted using &#39;nodes&#39;.
+/mnt/c/Users/John/Dropbox/git/openmdao/openmdao/core/system.py:2695: PromotionWarning:&#39;AS_point_1.coupled.wing.struct_states&#39; &lt;class SpatialBeamStates&gt;: input variable &#39;load_factor&#39;, promoted using &#39;load_factor&#39;, was already promoted using &#39;load_factor&#39;.
+/mnt/c/Users/John/Dropbox/git/openmdao/openmdao/core/system.py:2695: PromotionWarning:&#39;AS_point_1.coupled.wing.struct_states&#39; &lt;class SpatialBeamStates&gt;: input variable &#39;nodes&#39;, promoted using &#39;nodes&#39;, was already promoted using &#39;nodes&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/mnt/c/Users/John/Dropbox/git/openmdao/openmdao/recorders/sqlite_recorder.py:227: UserWarning:The existing case recorder file, aerostruct.db, is being overwritten.
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>==================
+AS_point_0.coupled
+==================
+NL: NLBGS 1 ; 1632894.66 1
+NL: NLBGS 2 ; 1065249.98 0.652369078
+NL: NLBGS 3 ; 191093.757 0.117027609
+NL: NLBGS 4 ; 46092.3602 0.0282273936
+NL: NLBGS 5 ; 1525.33068 0.000934126812
+NL: NLBGS 6 ; 913.496172 0.000559433621
+NL: NLBGS 7 ; 258.102355 0.000158064302
+NL: NLBGS 8 ; 30.1920001 1.8489864e-05
+NL: NLBGS 9 ; 1.48522998 9.09568767e-07
+NL: NLBGS 10 ; 0.527560791 3.23083175e-07
+NL: NLBGS 11 ; 0.0435564256 2.66743635e-08
+NL: NLBGS 12 ; 0.00928692455 5.68739967e-09
+NL: NLBGS 13 ; 0.00311251173 1.90613137e-09
+NL: NLBGS 14 ; 8.45891509e-05 5.18031892e-11
+NL: NLBGS 15 ; 2.00857161e-05 1.23006809e-11
+NL: NLBGS 16 ; 4.30339319e-06 2.63543834e-12
+NL: NLBGS 17 ; 8.83951024e-07 5.41339896e-13
+NL: NLBGS 18 ; 2.35028742e-07 1.43933805e-13
+NL: NLBGS 19 ; 7.91459745e-08 4.84697369e-14
+NL: NLBGS Converged
+
+==================
+AS_point_1.coupled
+==================
+NL: NLBGS 1 ; 4204333.61 1
+NL: NLBGS 2 ; 3178294.52 0.755956785
+NL: NLBGS 3 ; 1413471.2 0.336193873
+NL: NLBGS 4 ; 390387.883 0.0928536884
+NL: NLBGS 5 ; 82929.7278 0.019724821
+NL: NLBGS 6 ; 79638.0657 0.0189418997
+NL: NLBGS 7 ; 95055.9497 0.0226090407
+NL: NLBGS 8 ; 76748.0874 0.0182545189
+NL: NLBGS 9 ; 17691.3692 0.00420788901
+NL: NLBGS 10 ; 1470.77833 0.000349824364
+NL: NLBGS 11 ; 481.146146 0.000114440525
+NL: NLBGS 12 ; 62.4547521 1.48548517e-05
+NL: NLBGS 13 ; 5.75686319 1.36926889e-06
+NL: NLBGS 14 ; 2.5463608 6.05651462e-07
+NL: NLBGS 15 ; 0.707517967 1.68283022e-07
+NL: NLBGS 16 ; 0.219368938 5.21768629e-08
+NL: NLBGS 17 ; 0.308325568 7.33351813e-08
+NL: NLBGS 18 ; 0.0110514626 2.62858842e-09
+NL: NLBGS 19 ; 0.00489497817 1.16426969e-09
+NL: NLBGS 20 ; 0.00175006941 4.16253698e-10
+NL: NLBGS 21 ; 0.000149325878 3.55171336e-11
+NL: NLBGS 22 ; 0.000190665909 4.53498524e-11
+NL: NLBGS 23 ; 5.45494671e-06 1.2974581e-12
+NL: NLBGS 24 ; 7.08705524e-07 1.68565483e-13
+NL: NLBGS 25 ; 2.70659595e-07 6.43763365e-14
+NL: NLBGS 26 ; 1.25410028e-07 2.98287528e-14
+NL: NLBGS 27 ; 2.02642346e-09 4.81984459e-16
+NL: NLBGS Converged
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/mnt/c/Users/John/Dropbox/git/OpenAeroStruct/openaerostruct/structures/wingbox_geometry.py:85: ComplexWarning: Casting complex values to real discards the imaginary part
+  fem_chords[ielem] = fem_chords[ielem] * cos_theta_fe_sweep
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>==================
+AS_point_0.coupled
+==================
+NL: NLBGS 1 ; 5.36419658e-09 1
+NL: NLBGS Converged
+
+==================
+AS_point_1.coupled
+==================
+NL: NLBGS 1 ; 7.98012304e-09 1
+NL: NLBGS Converged
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>==================
+AS_point_0.coupled
+==================
+NL: NLBGS 1 ; 406339.465 1
+NL: NLBGS 2 ; 186124.609 0.458052011
+NL: NLBGS 3 ; 52983.5366 0.130392298
+NL: NLBGS 4 ; 5413.48771 0.0133225743
+NL: NLBGS 5 ; 182.555338 0.000449268047
+NL: NLBGS 6 ; 126.838548 0.000312149224
+NL: NLBGS 7 ; 4.91482759 1.20953735e-05
+NL: NLBGS 8 ; 2.17875542 5.36190946e-06
+NL: NLBGS 9 ; 0.249046781 6.12903256e-07
+NL: NLBGS 10 ; 0.0310757121 7.64772187e-08
+NL: NLBGS 11 ; 0.00286719512 7.05615717e-09
+NL: NLBGS 12 ; 0.000846390105 2.08296308e-09
+NL: NLBGS 13 ; 1.05285428e-05 2.59107069e-11
+NL: NLBGS 14 ; 4.73016124e-07 1.16409103e-12
+NL: NLBGS 15 ; 2.18957415e-07 5.38853431e-13
+NL: NLBGS 16 ; 3.75616083e-09 9.24389864e-15
+NL: NLBGS Converged
+
+==================
+AS_point_1.coupled
+==================
+NL: NLBGS 1 ; 1238525.18 1
+NL: NLBGS 2 ; 889409.536 0.718119868
+NL: NLBGS 3 ; 28681.0881 0.0231574527
+NL: NLBGS 4 ; 9639.11261 0.0077827345
+NL: NLBGS 5 ; 4185.60786 0.00337950971
+NL: NLBGS 6 ; 117.238957 9.46601327e-05
+NL: NLBGS 7 ; 41.2881435 3.33365395e-05
+NL: NLBGS 8 ; 26.2555753 2.11990647e-05
+NL: NLBGS 9 ; 1.68601379 1.36130764e-06
+NL: NLBGS 10 ; 0.422343981 3.41005568e-07
+NL: NLBGS 11 ; 0.175158516 1.41425075e-07
+NL: NLBGS 12 ; 0.0626517284 5.05857528e-08
+NL: NLBGS 13 ; 0.000692841166 5.59408222e-10
+NL: NLBGS 14 ; 0.000982761714 7.9349353e-10
+NL: NLBGS 15 ; 8.92433356e-05 7.20561337e-11
+NL: NLBGS 16 ; 1.5295059e-05 1.23494131e-11
+NL: NLBGS 17 ; 6.50634289e-07 5.25329886e-13
+NL: NLBGS 18 ; 1.51826009e-07 1.22586131e-13
+NL: NLBGS 19 ; 7.34940112e-08 5.93399413e-14
+NL: NLBGS Converged
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>==================
+AS_point_0.coupled
+==================
+NL: NLBGS 1 ; 75852.1518 1
+NL: NLBGS 2 ; 52184.1358 0.687971727
+NL: NLBGS 3 ; 13445.9385 0.17726509
+NL: NLBGS 4 ; 1814.44364 0.0239207932
+NL: NLBGS 5 ; 66.3085521 0.000874181556
+NL: NLBGS 6 ; 26.3720179 0.000347676595
+NL: NLBGS 7 ; 2.80730244 3.70101885e-05
+NL: NLBGS 8 ; 0.194058062 2.55837253e-06
+NL: NLBGS 9 ; 0.0242615493 3.19853145e-07
+NL: NLBGS 10 ; 0.00792279334 1.04450476e-07
+NL: NLBGS 11 ; 5.6012746e-05 7.38446368e-10
+NL: NLBGS 12 ; 6.07148333e-06 8.00436531e-11
+NL: NLBGS 13 ; 3.46699157e-06 4.57072276e-11
+NL: NLBGS 14 ; 6.16279974e-08 8.12475269e-13
+NL: NLBGS Converged
+
+==================
+AS_point_1.coupled
+==================
+NL: NLBGS 1 ; 317350.432 1
+NL: NLBGS 2 ; 351536.727 1.10772412
+NL: NLBGS 3 ; 174817.549 0.550865954
+NL: NLBGS 4 ; 29021.6598 0.0914498828
+NL: NLBGS 5 ; 2365.21515 0.00745300749
+NL: NLBGS 6 ; 2698.07221 0.0085018703
+NL: NLBGS 7 ; 2332.93514 0.00735129026
+NL: NLBGS 8 ; 954.0971 0.00300644651
+NL: NLBGS 9 ; 217.671465 0.000685902531
+NL: NLBGS 10 ; 13.7760434 4.34095625e-05
+NL: NLBGS 11 ; 6.38250115 2.01118401e-05
+NL: NLBGS 12 ; 1.89877881 5.98322429e-06
+NL: NLBGS 13 ; 0.183581146 5.78480846e-07
+NL: NLBGS 14 ; 0.162143183 5.10927877e-07
+NL: NLBGS 15 ; 0.0214022499 6.74404308e-08
+NL: NLBGS 16 ; 0.00223256403 7.03501179e-09
+NL: NLBGS 17 ; 0.00108355614 3.41438368e-09
+NL: NLBGS 18 ; 6.46073447e-05 2.03583604e-10
+NL: NLBGS 19 ; 1.94103722e-05 6.11638435e-11
+NL: NLBGS 20 ; 2.24584063e-05 7.07684756e-11
+NL: NLBGS 21 ; 5.29517307e-07 1.66855707e-12
+NL: NLBGS 22 ; 9.50248162e-08 2.99431816e-13
+NL: NLBGS Converged
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>==================
+AS_point_0.coupled
+==================
+NL: NLBGS 1 ; 33564.2133 1
+NL: NLBGS 2 ; 18094.7767 0.539109217
+NL: NLBGS 3 ; 4986.97136 0.148580017
+NL: NLBGS 4 ; 771.949042 0.0229991699
+NL: NLBGS 5 ; 2.1627256 6.44354624e-05
+NL: NLBGS 6 ; 1.18005956 3.51582666e-05
+NL: NLBGS 7 ; 0.163923113 4.88386579e-06
+NL: NLBGS 8 ; 0.0117426925 3.49857522e-07
+NL: NLBGS 9 ; 0.000332183405 9.89695191e-09
+NL: NLBGS 10 ; 3.61485951e-05 1.07699813e-09
+NL: NLBGS 11 ; 8.73418449e-06 2.60223126e-10
+NL: NLBGS 12 ; 5.22013407e-07 1.55526782e-11
+NL: NLBGS 13 ; 3.39750137e-08 1.01223924e-12
+NL: NLBGS Converged
+
+==================
+AS_point_1.coupled
+==================
+NL: NLBGS 1 ; 92983.0477 1
+NL: NLBGS 2 ; 71538.3872 0.769370213
+NL: NLBGS 3 ; 33081.2417 0.355777128
+NL: NLBGS 4 ; 8299.7861 0.0892612827
+NL: NLBGS 5 ; 134.164859 0.00144289591
+NL: NLBGS 6 ; 123.07434 0.00132362127
+NL: NLBGS 7 ; 60.8552482 0.000654476808
+NL: NLBGS 8 ; 27.208178 0.000292614392
+NL: NLBGS 9 ; 2.374629 2.55383004e-05
+NL: NLBGS 10 ; 0.623512011 6.70565256e-06
+NL: NLBGS 11 ; 0.359388814 3.86510039e-06
+NL: NLBGS 12 ; 0.0225206877 2.42202082e-07
+NL: NLBGS 13 ; 0.0125821709 1.35316827e-07
+NL: NLBGS 14 ; 0.00799581868 8.59922199e-08
+NL: NLBGS 15 ; 0.000220427413 2.37061935e-09
+NL: NLBGS 16 ; 7.63713804e-05 8.21347357e-10
+NL: NLBGS 17 ; 3.23054275e-05 3.4743352e-10
+NL: NLBGS 18 ; 2.41645352e-06 2.59881083e-11
+NL: NLBGS 19 ; 1.26324594e-06 1.35857661e-11
+NL: NLBGS 20 ; 1.09450396e-06 1.17710054e-11
+NL: NLBGS 21 ; 4.43033071e-08 4.76466498e-13
+NL: NLBGS Converged
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>==================
+AS_point_0.coupled
+==================
+NL: NLBGS 1 ; 166584.198 1
+NL: NLBGS 2 ; 126375.706 0.758629614
+NL: NLBGS 3 ; 32217.3698 0.193399915
+NL: NLBGS 4 ; 5127.26018 0.0307787907
+NL: NLBGS 5 ; 41.6304752 0.000249906508
+NL: NLBGS 6 ; 24.0083708 0.000144121538
+NL: NLBGS 7 ; 2.09322471 1.25655658e-05
+NL: NLBGS 8 ; 0.350139563 2.10187741e-06
+NL: NLBGS 9 ; 0.0112672514 6.76369758e-08
+NL: NLBGS 10 ; 0.000784869922 4.71155085e-09
+NL: NLBGS 11 ; 0.000134156022 8.05334618e-10
+NL: NLBGS 12 ; 3.24490398e-05 1.94790623e-10
+NL: NLBGS 13 ; 4.40427818e-06 2.64387512e-11
+NL: NLBGS 14 ; 5.04341854e-07 3.02754918e-12
+NL: NLBGS 15 ; 1.97218142e-07 1.18389465e-12
+NL: NLBGS 16 ; 1.3912564e-08 8.35167088e-14
+NL: NLBGS Converged
+
+==================
+AS_point_1.coupled
+==================
+NL: NLBGS 1 ; 478126.573 1
+NL: NLBGS 2 ; 456474.9 0.954715604
+NL: NLBGS 3 ; 200261.687 0.418846595
+NL: NLBGS 4 ; 50438.3351 0.105491595
+NL: NLBGS 5 ; 1813.00008 0.00379188312
+NL: NLBGS 6 ; 1594.33395 0.0033345437
+NL: NLBGS 7 ; 1634.42832 0.00341840092
+NL: NLBGS 8 ; 549.873385 0.0011500582
+NL: NLBGS 9 ; 159.328537 0.00033323506
+NL: NLBGS 10 ; 7.67628691 1.60549263e-05
+NL: NLBGS 11 ; 3.72890469 7.79899068e-06
+NL: NLBGS 12 ; 0.253594322 5.30391607e-07
+NL: NLBGS 13 ; 0.0753304848 1.57553437e-07
+NL: NLBGS 14 ; 0.0680177706 1.42258921e-07
+NL: NLBGS 15 ; 0.00277355124 5.8008724e-09
+NL: NLBGS 16 ; 0.000562949268 1.17740636e-09
+NL: NLBGS 17 ; 0.000291344895 6.09346796e-10
+NL: NLBGS 18 ; 4.19000863e-06 8.76338791e-12
+NL: NLBGS 19 ; 1.29089418e-06 2.69990051e-12
+NL: NLBGS 20 ; 1.31446553e-06 2.7491999e-12
+NL: NLBGS 21 ; 6.71078332e-08 1.40355791e-13
+NL: NLBGS Converged
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>==================
+AS_point_0.coupled
+==================
+NL: NLBGS 1 ; 57904.9969 1
+NL: NLBGS 2 ; 50840.7485 0.878002784
+NL: NLBGS 3 ; 12497.9764 0.215835888
+NL: NLBGS 4 ; 1799.03885 0.0310688014
+NL: NLBGS 5 ; 8.25992951 0.00014264623
+NL: NLBGS 6 ; 2.83175271 4.89034256e-05
+NL: NLBGS 7 ; 0.431482429 7.45155777e-06
+NL: NLBGS 8 ; 0.0104474482 1.80423949e-07
+NL: NLBGS 9 ; 0.00117694099 2.03253787e-08
+NL: NLBGS 10 ; 6.62334466e-05 1.14382955e-09
+NL: NLBGS 11 ; 1.68016337e-05 2.90158616e-10
+NL: NLBGS 12 ; 2.70745535e-07 4.67568517e-12
+NL: NLBGS 13 ; 1.09534768e-07 1.89162895e-12
+NL: NLBGS 14 ; 1.0654116e-08 1.83993032e-13
+NL: NLBGS Converged
+
+==================
+AS_point_1.coupled
+==================
+NL: NLBGS 1 ; 172689.741 1
+NL: NLBGS 2 ; 214841.321 1.2440885
+NL: NLBGS 3 ; 108668.695 0.629271282
+NL: NLBGS 4 ; 1233.94702 0.00714545642
+NL: NLBGS 5 ; 561.360392 0.00325068755
+NL: NLBGS 6 ; 664.180121 0.00384608904
+NL: NLBGS 7 ; 631.752863 0.00365831148
+NL: NLBGS 8 ; 110.487157 0.000639801509
+NL: NLBGS 9 ; 28.4341349 0.000164654453
+NL: NLBGS 10 ; 11.6466649 6.74427142e-05
+NL: NLBGS 11 ; 1.23276519 7.13861274e-06
+NL: NLBGS 12 ; 0.237928372 1.37777942e-06
+NL: NLBGS 13 ; 0.0893892685 5.17629292e-07
+NL: NLBGS 14 ; 0.022685729 1.31366975e-07
+NL: NLBGS 15 ; 0.0127897788 7.40621806e-08
+NL: NLBGS 16 ; 0.0078457237 4.54324829e-08
+NL: NLBGS 17 ; 0.00112300166 6.50300157e-09
+NL: NLBGS 18 ; 0.000578140318 3.34785561e-09
+NL: NLBGS 19 ; 2.79288607e-05 1.61728546e-10
+NL: NLBGS 20 ; 5.38861237e-06 3.12040098e-11
+NL: NLBGS 21 ; 5.13244768e-06 2.97206287e-11
+NL: NLBGS 22 ; 1.72335939e-07 9.97951229e-13
+NL: NLBGS 23 ; 2.12158209e-08 1.22855132e-13
+NL: NLBGS Converged
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>==================
+AS_point_0.coupled
+==================
+NL: NLBGS 1 ; 27017.7544 1
+NL: NLBGS 2 ; 23761.9708 0.879494662
+NL: NLBGS 3 ; 5944.72473 0.220030305
+NL: NLBGS 4 ; 871.528236 0.0322576119
+NL: NLBGS 5 ; 4.02269348 0.000148890741
+NL: NLBGS 6 ; 1.33041727 4.92423333e-05
+NL: NLBGS 7 ; 0.153023248 5.66380334e-06
+NL: NLBGS 8 ; 0.00323277888 1.1965387e-07
+NL: NLBGS 9 ; 0.000234991536 8.6976709e-09
+NL: NLBGS 10 ; 4.94896676e-05 1.83174615e-09
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>NL: NLBGS 11 ; 5.98644228e-06 2.21574384e-10
+NL: NLBGS 12 ; 1.33543964e-07 4.94282248e-12
+NL: NLBGS 13 ; 4.72722167e-08 1.74967231e-12
+NL: NLBGS Converged
+
+==================
+AS_point_1.coupled
+==================
+NL: NLBGS 1 ; 80601.0641 1
+NL: NLBGS 2 ; 101705.146 1.26183379
+NL: NLBGS 3 ; 52202.6647 0.64766719
+NL: NLBGS 4 ; 630.526783 0.00782280966
+NL: NLBGS 5 ; 156.282979 0.00193896917
+NL: NLBGS 6 ; 230.113536 0.00285496895
+NL: NLBGS 7 ; 150.627651 0.00186880475
+NL: NLBGS 8 ; 37.1726706 0.000461193298
+NL: NLBGS 9 ; 1.61748494 2.00677864e-05
+NL: NLBGS 10 ; 0.211792022 2.62765788e-06
+NL: NLBGS 11 ; 0.0139600426 1.73199235e-07
+NL: NLBGS 12 ; 0.00616563009 7.64956414e-08
+NL: NLBGS 13 ; 0.000292733205 3.63187768e-09
+NL: NLBGS 14 ; 7.13696634e-05 8.85468005e-10
+NL: NLBGS 15 ; 6.80258394e-05 8.43981902e-10
+NL: NLBGS 16 ; 2.58003454e-06 3.20099315e-11
+NL: NLBGS 17 ; 2.05926034e-07 2.55487984e-12
+NL: NLBGS 18 ; 7.57012102e-08 9.3920857e-13
+NL: NLBGS Converged
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>==================
+AS_point_0.coupled
+==================
+NL: NLBGS 1 ; 45280.6079 1
+NL: NLBGS 2 ; 51171.4587 1.13009655
+NL: NLBGS 3 ; 11894.4153 0.262682324
+NL: NLBGS 4 ; 1501.45444 0.0331588844
+NL: NLBGS 5 ; 11.6737559 0.00025780917
+NL: NLBGS 6 ; 2.89539141 6.3943298e-05
+NL: NLBGS 7 ; 0.378564655 8.3604146e-06
+NL: NLBGS 8 ; 0.0208015201 4.5939136e-07
+NL: NLBGS 9 ; 0.000860172658 1.89964909e-08
+NL: NLBGS 10 ; 0.000130827526 2.8892617e-09
+NL: NLBGS 11 ; 1.82148311e-05 4.02265603e-10
+NL: NLBGS 12 ; 2.36324182e-07 5.21910357e-12
+NL: NLBGS 13 ; 4.37624322e-08 9.66471835e-13
+NL: NLBGS Converged
+
+==================
+AS_point_1.coupled
+==================
+NL: NLBGS 1 ; 143986.374 1
+NL: NLBGS 2 ; 200571.79 1.39299147
+NL: NLBGS 3 ; 95812.5881 0.665428163
+NL: NLBGS 4 ; 1994.92356 0.0138549469
+NL: NLBGS 5 ; 401.57827 0.0027890019
+NL: NLBGS 6 ; 556.121535 0.00386232058
+NL: NLBGS 7 ; 327.387712 0.00227374094
+NL: NLBGS 8 ; 95.0996282 0.000660476584
+NL: NLBGS 9 ; 3.32697457 2.31061766e-05
+NL: NLBGS 10 ; 0.36136792 2.50973693e-06
+NL: NLBGS 11 ; 0.104304852 7.24407802e-07
+NL: NLBGS 12 ; 0.0280558679 1.94850854e-07
+NL: NLBGS 13 ; 0.000696102352 4.83450158e-09
+NL: NLBGS 14 ; 0.000632411853 4.3921646e-09
+NL: NLBGS 15 ; 2.30424453e-05 1.60032124e-10
+NL: NLBGS 16 ; 7.79027456e-07 5.41042487e-12
+NL: NLBGS 17 ; 2.5710808e-07 1.78564175e-12
+NL: NLBGS 18 ; 8.86794902e-08 6.15888073e-13
+NL: NLBGS Converged
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>==================
+AS_point_0.coupled
+==================
+NL: NLBGS 1 ; 22047.543 1
+NL: NLBGS 2 ; 24485.5257 1.11057843
+NL: NLBGS 3 ; 5163.40991 0.234194346
+NL: NLBGS 4 ; 707.116195 0.0320723355
+NL: NLBGS 5 ; 6.90786162 0.000313316618
+NL: NLBGS 6 ; 1.17459825 5.32756984e-05
+NL: NLBGS 7 ; 0.143709075 6.51814468e-06
+NL: NLBGS 8 ; 0.00412810348 1.87236441e-07
+NL: NLBGS 9 ; 0.000228717687 1.03738402e-08
+NL: NLBGS 10 ; 4.79247787e-05 2.17370156e-09
+NL: NLBGS 11 ; 4.55974348e-06 2.06814132e-10
+NL: NLBGS 12 ; 1.07347083e-07 4.86889097e-12
+NL: NLBGS 13 ; 3.51387022e-08 1.59376953e-12
+NL: NLBGS Converged
+
+==================
+AS_point_1.coupled
+==================
+NL: NLBGS 1 ; 73944.8155 1
+NL: NLBGS 2 ; 99511.2867 1.34575069
+NL: NLBGS 3 ; 45613.2109 0.616854753
+NL: NLBGS 4 ; 1025.60216 0.0138698319
+NL: NLBGS 5 ; 176.325292 0.00238455246
+NL: NLBGS 6 ; 125.620165 0.00169883668
+NL: NLBGS 7 ; 42.4512323 0.000574093424
+NL: NLBGS 8 ; 1.40279307 1.89708104e-05
+NL: NLBGS 9 ; 0.355242946 4.80416299e-06
+NL: NLBGS 10 ; 0.107504945 1.45385372e-06
+NL: NLBGS 11 ; 0.0150845876 2.03997907e-07
+NL: NLBGS 12 ; 0.00236994419 3.20501738e-08
+NL: NLBGS 13 ; 0.00151641884 2.05074397e-08
+NL: NLBGS 14 ; 0.000106363715 1.43842018e-09
+NL: NLBGS 15 ; 1.61483385e-05 2.18383647e-10
+NL: NLBGS 16 ; 5.49781884e-06 7.43502949e-11
+NL: NLBGS 17 ; 1.23046513e-06 1.66403165e-11
+NL: NLBGS 18 ; 3.22726081e-08 4.36441796e-13
+NL: NLBGS Converged
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Optimization terminated successfully    (Exit mode 0)
+            Current function value: 0.9160099306252505
+            Iterations: 7
+            Function evaluations: 9
+            Gradient evaluations: 7
+Optimization Complete
+-----------------------------------
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The fuel burn value is 91600.99306252504 [kg]
+The wingbox mass (excluding the wing_weight_ratio) is 19301.121688354207 [kg]
 </pre></div>
 </div>
 </div>
